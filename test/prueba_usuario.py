@@ -1,7 +1,7 @@
 import requests
 
 # URL de la API para crear un nuevo usuario
-api_url = "http://127.0.0.1:8000/login"
+api_url = "https://sisvita-pbaq.onrender.com/login"
 # Datos de inicio de sesión
 login_data = {
     "correo_electronico": "nuevo_usuario@example.com",
