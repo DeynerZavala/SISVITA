@@ -6,8 +6,10 @@ class Preguntas(db.Model):
     __tablename__ = 'preguntas'
     
     pregunta_id = db.Column(db.Integer, primary_key=True)
-    test_id = db.Column(db.Integer, db.ForeignKey('Tests.test_id'))
     textopregunta = db.Column(db.Text, nullable=False)
+
+    test_id = db.Column(db.Integer, db.ForeignKey('Tests.test_id'))
+   # tests = db.relationship('Tests', back_populates='preguntas')
 
     def __init__(self, pregunta_id, test_id, textopregunta):
         self.pregunta_id = pregunta_id
