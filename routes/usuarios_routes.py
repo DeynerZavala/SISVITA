@@ -3,6 +3,7 @@ from flask import Blueprint, request, make_response, jsonify
 from models.usuarios import Usuarios
 from schemas.usuarios_schema import usuarios_schema, usuario_schema
 from utils.db import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 usuarios_routes = Blueprint('usuarios_routes', __name__)
 
@@ -16,18 +17,23 @@ def create_usuario():
     fecha_registro = datetime.date.today()
     contrasena = request.json.get('contrasena')
 
+    # Hash de la contraseña usando pbkdf2:sha256
+    hashed_contrasena = generate_password_hash(contrasena, method='pbkdf2:sha256')
+
     new_usuario = Usuarios(usuario, apellido_paterno, apellido_materno,
-                           correo_electronico,  contrasena, fecha_registro)
+                           correo_electronico, hashed_contrasena, fecha_registro)
 
     db.session.add(new_usuario)
     db.session.commit()
     result = usuario_schema.dump(new_usuario)
-    data={
-        'message':'Nuevo Usuario creado',
+    data = {
+        'message': 'Nuevo Usuario creado',
         'status': 201,
         'data': result
     }
     return make_response(jsonify(data), 201)
+
+
 @usuarios_routes.route('/usuarios', methods=['GET'])
 def get_usuarios():
     all_usuarios = Usuarios.query.all()
@@ -53,11 +59,12 @@ def get_usuario(id):
     result = usuario_schema.dump(usuario)
 
     data = {
-        'message': 'El usuario eencontrado',
+        'message': 'El usuario encontrado',
         'status': 200,
         'data': result
     }
-    return  make_response(jsonify(data), 200)
+    return make_response(jsonify(data), 200)
+
 
 @usuarios_routes.route('/usuarios/<int:id>', methods=['PUT'])
 def update_usuario(id):
@@ -77,8 +84,11 @@ def update_usuario(id):
     usuario.nombre = nombre
     usuario.apellido_paterno = apellido_paterno
     usuario.apellido_materno = apellido_materno
-    usuario.contrasena = contrasena
     usuario.correo_electronico = correo_electronico
+
+    if contrasena:
+        # Hash de la nueva contraseña usando pbkdf2:sha256
+        usuario.contrasena = generate_password_hash(contrasena, method='pbkdf2:sha256')
 
     db.session.commit()
 
@@ -109,3 +119,19 @@ def delete_usuario(id):
         'status': 200,
     }
     return make_response(jsonify(data), 200)
+
+
+@usuarios_routes.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    if not data or not 'correo_electronico' in data or not 'contrasena' in data:
+        return make_response(jsonify({'message': 'Credenciales incompletas'}), 400)
+
+    correo_electronico = data['correo_electronico']
+    contrasena = data['contrasena']
+
+    usuario = Usuarios.query.filter_by(correo_electronico=correo_electronico).first()
+    if not usuario or not check_password_hash(usuario.contrasena, contrasena):
+        return make_response(jsonify({'message': 'Credenciales inválidas'}), 401)
+
+    return jsonify({'message': 'Inicio de sesión exitoso'})

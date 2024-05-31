@@ -9,7 +9,7 @@ class Usuarios(db.Model):
     apellido_paterno = db.Column(db.String(100))
     apellido_materno = db.Column(db.String(100))
     correo_electronico = db.Column(db.String(100), unique=True)
-    contrasena = db.Column(db.String(100))
+    contrasena = db.Column(db.String(255))
     fecha_registro = db.Column(db.Date)
 
     def __init__(self,  nombre, apellido_paterno, apellido_materno,

@@ -1,15 +1,20 @@
 import requests
 
-def eliminar_usuario(id_usuario):
-    url = f'http://127.0.0.1:5000/usuarios/{id_usuario}'
-    response = requests.delete(url)
+# URL de la API para crear un nuevo usuario
+api_url = "http://127.0.0.1:8000/login"
+# Datos de inicio de sesión
+login_data = {
+    "correo_electronico": "nuevo_usuario@example.com",
+    "contrasena": "contrasena_segura"
+}
 
-    if response.status_code == 200:
-        print('Usuario eliminado correctamente.')
-    elif response.status_code == 404:
-        print('El usuario no fue encontrado.')
-    else:
-        print('Ocurrió un error al eliminar el usuario.')
+# Hacer la solicitud POST a la API
+response = requests.post(api_url, json=login_data)
 
-# Llama a la función para eliminar un usuario (reemplaza 'id_del_usuario' con el ID real)
-eliminar_usuario(5)
+# Comprobar el estado de la respuesta
+if response.status_code == 200:
+    print("Inicio de sesión exitoso.")
+    print("Respuesta:", response.json())
+else:
+    print(f"Error al iniciar sesión. Estado: {response.status_code}")
+    print("Respuesta:", response.json())
