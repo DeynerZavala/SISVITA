@@ -118,7 +118,7 @@ def get_all_test(id):
         .where(Tests.test_id == id)
         .join(Preguntas, Preguntas.test_id == Tests.test_id)
         .outerjoin(Opciones, Opciones.pregunta_id == Preguntas.pregunta_id)
-        .join(Opciones_predeterminadas,Opciones_predeterminadas.opciones_id == Opciones.opcion_id)
+        .join(Opciones_predeterminadas,Opciones_predeterminadas.op_pre_id == Opciones.op_pre_id)
         .all()
     )
 
@@ -146,16 +146,17 @@ def get_all_test(id):
         if row.opcion_id:
             temp_response[test_id]["preguntas"][pregunta_id]["opciones"].append({
                 "opcion_id": row.opcion_id,
-                "textoopcion": row.textoopcion,
-                "escorrecta": row.escorrecta
+                "op_pre_id": row.op_pre_id,
+                "nombre" : row.nombre
             })
+
 
     for test in temp_response.values():
         test['preguntas'] = list(test['preguntas'].values())
         response.append(test)
 
     if response:
-        return jsonify({
+        return jsonify ({
             'message': 'Todos los test completos',
             'status': 200,
             'data': response})

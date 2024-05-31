@@ -87,7 +87,6 @@ def update_usuario(id):
     usuario.correo_electronico = correo_electronico
 
     if contrasena:
-        # Hash de la nueva contraseña usando pbkdf2:sha256
         usuario.contrasena = generate_password_hash(contrasena, method='pbkdf2:sha256')
 
     db.session.commit()
