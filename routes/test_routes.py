@@ -1,6 +1,7 @@
 from flask import Blueprint, make_response, jsonify
 
 from models.opciones import Opciones
+from models.opciones_predeterminadas import Opciones_predeterminadas
 from models.preguntas import Preguntas
 from models.tests import Tests
 from schemas.tests_schema import tests_schema, test_schema
@@ -41,6 +42,7 @@ def get_test(id):
 @test_routes.route('/test/all', methods=['GET'])
 def get_all_tests():
     response = []
+
     data = (
         db.session.query(
             Tests.test_id.label('test_id'),
@@ -48,35 +50,114 @@ def get_all_tests():
             Tests.fecha_creacion.label('fecha_creacion'),
             Preguntas.pregunta_id.label('pregunta_id'),
             Preguntas.textopregunta.label('textopregunta'),
+            Opciones.opcion_id.label('opcion_id'),
+            Opciones.op_pre_id.label('op_pre_id'),
+            Opciones_predeterminadas.nombre.label('nombre')
         )
-        .join(Tests, Preguntas.test_id == Tests.test_id)
+        .join(Preguntas, Preguntas.test_id == Tests.test_id)
+        .outerjoin(Opciones, Opciones.pregunta_id == Preguntas.pregunta_id)
+        .join(Opciones_predeterminadas,Opciones_predeterminadas.op_pre_id == Opciones.op_pre_id)
         .all()
     )
 
-    for row in data :
-        response.append({
-            "test_id": row[0],
-            "test_description": row[1],
-            "fecha_creacion": row[2],
-            "pregunta_id": row[3],
-            "textopregunta": row[4],
-        })
+    temp_response = {}
+
+    for row in data:
+        test_id = row.test_id
+        pregunta_id = row.pregunta_id
+
+        if test_id not in temp_response:
+            temp_response[test_id] = {
+                "test_id": test_id,
+                "test_description": row.test_description,
+                "fecha_creacion": row.fecha_creacion,
+                "preguntas": {}
+            }
+
+        if pregunta_id not in temp_response[test_id]["preguntas"]:
+            temp_response[test_id]["preguntas"][pregunta_id] = {
+                "pregunta_id": pregunta_id,
+                "textopregunta": row.textopregunta,
+                "opciones": []
+            }
+
+        if row.opcion_id:
+            temp_response[test_id]["preguntas"][pregunta_id]["opciones"].append({
+                "opcion_id": row.opcion_id,
+                "op_pre_id": row.op_pre_id,
+                "nombre" : row.nombre
+            })
+
+
+    for test in temp_response.values():
+        test['preguntas'] = list(test['preguntas'].values())
+        response.append(test)
+
     if response:
-        return jsonify(response)
+        return jsonify ({
+            'message': 'Todos los test completos',
+            'status': 200,
+            'data': response})
     else:
         return jsonify({'message': 'No se encontraron datos', 'status': 404})
-
 @test_routes.route('/test/all/<int:id>', methods=['GET'])
 def get_all_test(id):
-    test = Tests.query.get(id)
-    if test is None:
-        return jsonify({'message': 'No existe el test', 'status': 404})
-    preguntas = test.preguntas
-    preguntas_data =[
-        {
-            'pregunta_id': pregunta.pregunta_id,
-            'textopregunta': pregunta.textopregunta,
-        }
-        for pregunta in preguntas
-    ]
-    return make_response(jsonify(preguntas_data), 200)
+    response = []
+
+    data = (
+        db.session.query(
+            Tests.test_id.label('test_id'),
+            Tests.descripcion.label('test_description'),
+            Tests.fecha_creacion.label('fecha_creacion'),
+            Preguntas.pregunta_id.label('pregunta_id'),
+            Preguntas.textopregunta.label('textopregunta'),
+            Opciones.opcion_id.label('opcion_id'),
+            Opciones.op_pre_id.label('op_pre_id'),
+            Opciones_predeterminadas.nombre.label('nombre')
+        )
+        .where(Tests.test_id == id)
+        .join(Preguntas, Preguntas.test_id == Tests.test_id)
+        .outerjoin(Opciones, Opciones.pregunta_id == Preguntas.pregunta_id)
+        .join(Opciones_predeterminadas,Opciones_predeterminadas.opciones_id == Opciones.opcion_id)
+        .all()
+    )
+
+    temp_response = {}
+
+    for row in data:
+        test_id = row.test_id
+        pregunta_id = row.pregunta_id
+
+        if test_id not in temp_response:
+            temp_response[test_id] = {
+                "test_id": test_id,
+                "test_description": row.test_description,
+                "fecha_creacion": row.fecha_creacion,
+                "preguntas": {}
+            }
+
+        if pregunta_id not in temp_response[test_id]["preguntas"]:
+            temp_response[test_id]["preguntas"][pregunta_id] = {
+                "pregunta_id": pregunta_id,
+                "textopregunta": row.textopregunta,
+                "opciones": []
+            }
+
+        if row.opcion_id:
+            temp_response[test_id]["preguntas"][pregunta_id]["opciones"].append({
+                "opcion_id": row.opcion_id,
+                "textoopcion": row.textoopcion,
+                "escorrecta": row.escorrecta
+            })
+
+    for test in temp_response.values():
+        test['preguntas'] = list(test['preguntas'].values())
+        response.append(test)
+
+    if response:
+        return jsonify({
+            'message': 'Todos los test completos',
+            'status': 200,
+            'data': response})
+    else:
+        return jsonify({'message': 'No se encontraron datos', 'status': 404})

@@ -8,8 +8,6 @@ class Tests(db.Model):
     descripcion = db.Column(db.Text, nullable=True)
     fecha_creacion = db.Column(db.Date, nullable=True)
 
-  #  preguntas = db.relationship('Preguntas', backref='test', lazy=True)
-
     def __init__(self, test_id, descripcion, fecha_creacion):
         self.test_id = test_id
         self.descripcion = descripcion
