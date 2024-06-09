@@ -7,7 +7,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 usuarios_routes = Blueprint('usuarios_routes', __name__)
 
-
 @usuarios_routes.route('/usuarios', methods=['POST'])
 def create_usuario():
     nombre = request.json.get('nombre')
@@ -45,7 +44,7 @@ def create_usuario():
         return make_response(jsonify(data), 201)
     except Exception as e:
         db.session.rollback()
-        return make_response(jsonify({'message': 'Error al crear el usuario', 'status': 500, 'error': str(e)}), 500)
+        return make_response(jsonify({'message': 'Error al crear el usuario', 'status': 500}), 500)
 
 @usuarios_routes.route('/usuarios', methods=['GET'])
 def get_usuarios():
@@ -133,7 +132,7 @@ def delete_usuario(id):
     return make_response(jsonify(data), 200)
 
 
-@usuarios_routes.route('/login', methods=['POST'])
+@usuarios_routes.route('/usuarios/login', methods=['POST'])
 def login():
     data = request.json
     if not data or not 'correo_electronico' in data or not 'contrasena' in data:
