@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from flask import Blueprint, request, make_response, jsonify
 from models.usuarios import Usuarios
 from schemas.usuarios_schema import usuarios_schema, usuario_schema
