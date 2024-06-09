@@ -10,29 +10,42 @@ usuarios_routes = Blueprint('usuarios_routes', __name__)
 
 @usuarios_routes.route('/usuarios', methods=['POST'])
 def create_usuario():
-    usuario = request.json.get('usuario')
+    nombre = request.json.get('nombre')
     apellido_paterno = request.json.get('apellido_paterno')
     apellido_materno = request.json.get('apellido_materno')
     correo_electronico = request.json.get('correo_electronico')
-    fecha_registro = datetime.date.today()
     contrasena = request.json.get('contrasena')
+
+    # Validar que los datos requeridos estén presentes
+    if not all([nombre, apellido_paterno, correo_electronico, contrasena]):
+        return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 400)
 
     # Hash de la contraseña usando pbkdf2:sha256
     hashed_contrasena = generate_password_hash(contrasena, method='pbkdf2:sha256')
 
-    new_usuario = Usuarios(usuario, apellido_paterno, apellido_materno,
-                           correo_electronico, hashed_contrasena, fecha_registro)
+    # Crear una nueva instancia del modelo Usuarios
+    new_usuario = Usuarios(
+        nombre=nombre,
+        apellido_paterno=apellido_paterno,
+        apellido_materno=apellido_materno,
+        correo_electronico=correo_electronico,
+        contrasena=hashed_contrasena,
+        fecha_registro=datetime.now()  # Usar la fecha y hora actual con zona horaria
+    )
 
-    db.session.add(new_usuario)
-    db.session.commit()
-    result = usuario_schema.dump(new_usuario)
-    data = {
-        'message': 'Nuevo Usuario creado',
-        'status': 201,
-        'data': result
-    }
-    return make_response(jsonify(data), 201)
-
+    try:
+        db.session.add(new_usuario)
+        db.session.commit()
+        result = usuario_schema.dump(new_usuario)
+        data = {
+            'message': 'Nuevo Usuario creado',
+            'status': 201,
+            'data': result
+        }
+        return make_response(jsonify(data), 201)
+    except Exception as e:
+        db.session.rollback()
+        return make_response(jsonify({'message': 'Error al crear el usuario', 'status': 500, 'error': str(e)}), 500)
 
 @usuarios_routes.route('/usuarios', methods=['GET'])
 def get_usuarios():

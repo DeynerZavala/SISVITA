@@ -28,6 +28,7 @@ app.register_blueprint(especialistas_routes)
 app.register_blueprint(test_routes)
 app.register_blueprint(preguntas_routes)
 app.register_blueprint(opciones_routes)
+
 @app.route('/')
 def hello_world():  # put application's code here
     return 'Hello World!'
