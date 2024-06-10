@@ -19,6 +19,10 @@ def create_usuario():
     if not all([nombre, apellido_paterno, correo_electronico, contrasena]):
         return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 400)
 
+    existing_usuario = Usuarios.query.filter_by(correo_electronico=correo_electronico).first()
+    if existing_usuario:
+        return make_response(jsonify({'message': 'Correo electrónico ya registrado', 'status': 400}))
+
     # Hash de la contraseña usando pbkdf2:sha256
     hashed_contrasena = generate_password_hash(contrasena, method='pbkdf2:sha256')
 
