@@ -147,6 +147,6 @@ def login():
 
     usuario = Usuarios.query.filter_by(correo_electronico=correo_electronico).first()
     if not usuario or not check_password_hash(usuario.contrasena, contrasena):
-        return make_response(jsonify({'message': 'Credenciales inválidas'}))
+        return make_response(jsonify({'message': 'Credenciales inválidas'}),400)
 
-    return jsonify({'message': 'Inicio de sesión exitoso'})
+    return jsonify({'message': 'Inicio de sesión exitoso'},200)
