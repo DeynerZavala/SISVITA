@@ -140,7 +140,7 @@ def delete_usuario(id):
 def login():
     data = request.json
     if not data or not 'correo_electronico' in data or not 'contrasena' in data:
-        return make_response(jsonify({'message': 'Credenciales incompletas'}), 400)
+        return make_response(jsonify({'message': 'Credenciales incompletas','status': 400}), 400)
 
     correo_electronico = data['correo_electronico']
     contrasena = data['contrasena']
