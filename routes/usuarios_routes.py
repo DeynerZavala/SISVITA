@@ -21,7 +21,7 @@ def create_usuario():
 
     existing_usuario = Usuarios.query.filter_by(correo_electronico=correo_electronico).first()
     if existing_usuario:
-        return make_response(jsonify({'message': 'Correo electrónico ya registrado', 'status': 400}))
+        return make_response(jsonify({'message': 'Correo electrónico ya registrado', 'status': 400}), 400)
 
     # Hash de la contraseña usando pbkdf2:sha256
     hashed_contrasena = generate_password_hash(contrasena, method='pbkdf2:sha256')
