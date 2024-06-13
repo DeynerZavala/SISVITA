@@ -30,7 +30,7 @@ def get_test(id):
             'message': 'No existe el test',
             'status': 404
         }
-        return make_response(jsonify(data), 404)
+        return make_response(jsonify(data), 200)
     result = test_schema.dump(test)
 
     data = {
@@ -46,6 +46,7 @@ def get_all_tests():
     data = (
         db.session.query(
             Tests.test_id.label('test_id'),
+            Tests.titulo.label('titulo'),
             Tests.descripcion.label('test_description'),
             Tests.fecha_creacion.label('fecha_creacion'),
             Preguntas.pregunta_id.label('pregunta_id'),
@@ -69,6 +70,7 @@ def get_all_tests():
         if test_id not in temp_response:
             temp_response[test_id] = {
                 "test_id": test_id,
+                "titulo": row.titulo,
                 "test_description": row.test_description,
                 "fecha_creacion": row.fecha_creacion,
                 "preguntas": {}
@@ -94,12 +96,12 @@ def get_all_tests():
         response.append(test)
 
     if response:
-        return jsonify ({
+        return  make_response(jsonify ({
             'message': 'Todos los test completos',
             'status': 200,
-            'data': response})
+            'data': response}),200)
     else:
-        return jsonify({'message': 'No se encontraron datos', 'status': 404})
+        return  make_response(jsonify({'message': 'No se encontraron datos', 'status': 404}),200)
 @test_routes.route('/test/all/<int:id>', methods=['GET'])
 def get_all_test(id):
     response = []
@@ -107,6 +109,7 @@ def get_all_test(id):
     data = (
         db.session.query(
             Tests.test_id.label('test_id'),
+            Tests.titulo.label('titulo'),
             Tests.descripcion.label('test_description'),
             Tests.fecha_creacion.label('fecha_creacion'),
             Preguntas.pregunta_id.label('pregunta_id'),
@@ -131,6 +134,7 @@ def get_all_test(id):
         if test_id not in temp_response:
             temp_response[test_id] = {
                 "test_id": test_id,
+                "titulo": row.titulo,
                 "test_description": row.test_description,
                 "fecha_creacion": row.fecha_creacion,
                 "preguntas": {}
@@ -156,9 +160,9 @@ def get_all_test(id):
         response.append(test)
 
     if response:
-        return jsonify ({
+        return  make_response(jsonify ({
             'message': 'Todos los test completos',
             'status': 200,
-            'data': response})
+            'data': response}),200)
     else:
-        return jsonify({'message': 'No se encontraron datos', 'status': 404})
+        return  make_response(jsonify({'message': 'No se encontraron datos', 'status': 404}),200)
