@@ -11,7 +11,7 @@ class Usuarios(db.Model):
     apellido_materno = db.Column(db.String(255))
     correo_electronico = db.Column(db.String(255), unique=True)
     contrasena = db.Column(db.String(255))
-    fecha_registro = db.Column(db.Date, default=func.now())
+    fecha_registro = db.Column(db.TIMESTAMP(timezone=True), nullable=True, default=func.now())
 
     def __init__(self, nombre, apellido_paterno, apellido_materno,
                  correo_electronico, contrasena, fecha_registro):
