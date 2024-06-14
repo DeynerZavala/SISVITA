@@ -149,4 +149,11 @@ def login():
     if not usuario or not check_password_hash(usuario.contrasena, contrasena):
         return make_response(jsonify({'message': 'Credenciales inválidas', 'status': 400}), 200)
 
-    return make_response(jsonify({'message': 'Inicio de sesión exitoso',"status": 200}), 200)
+    result = usuario_schema.dump(usuario)
+
+    data = {
+        'message': 'Inicio de sesión exitoso',
+        'status': 200,
+        'data': result
+    }
+    return make_response(jsonify(data), 200)
