@@ -188,13 +188,13 @@ def responder():
         for pregunta in preguntas:
             pregunta_id = pregunta['pregunta_id']
             opcion_id = pregunta['opcion_id']
-            print(f"pregunta_id: {pregunta_id}, opcion_id: {opcion_id}")
             # Aquí podrías guardar esta información en la base de datos
             new_respuesta = Respuestas(pregunta_id, opcion_id)
             db.session.add(new_respuesta)
             db.session.commit()
             result = respuesta_schema.dump(new_respuesta)
             new_respuesta_usuario = Respuesta_Usuario(usuario_id,result['respuesta_id'],fecha_fin)
+            db.session.add(new_respuesta_usuario)
             db.session.commit()
 
         data = {
