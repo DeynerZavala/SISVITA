@@ -1,9 +1,13 @@
-from flask import Blueprint, make_response, jsonify
+from flask import Blueprint, make_response, jsonify, request
 
 from models.opciones import Opciones
 from models.opciones_predeterminadas import Opciones_predeterminadas
 from models.preguntas import Preguntas
+from models.respuesta import Respuestas
+from models.respuesta_usuario import Respuesta_Usuario
 from models.tests import Tests
+from schemas.respuesta_schema import respuesta_schema
+from schemas.respuesta_usuario_schema import respuesta_usuario_schema
 from schemas.tests_schema import tests_schema, test_schema
 from utils.db import db
 
@@ -39,6 +43,8 @@ def get_test(id):
         'data': result
     }
     return make_response(jsonify(data), 200)
+
+
 @test_routes.route('/test/all', methods=['GET'])
 def get_all_tests():
     response = []
@@ -57,7 +63,7 @@ def get_all_tests():
         )
         .join(Preguntas, Preguntas.test_id == Tests.test_id)
         .outerjoin(Opciones, Opciones.pregunta_id == Preguntas.pregunta_id)
-        .join(Opciones_predeterminadas,Opciones_predeterminadas.op_pre_id == Opciones.op_pre_id)
+        .join(Opciones_predeterminadas, Opciones_predeterminadas.op_pre_id == Opciones.op_pre_id)
         .all()
     )
 
@@ -87,21 +93,22 @@ def get_all_tests():
             temp_response[test_id]["preguntas"][pregunta_id]["opciones"].append({
                 "opcion_id": row.opcion_id,
                 "op_pre_id": row.op_pre_id,
-                "nombre" : row.nombre
+                "nombre": row.nombre
             })
-
 
     for test in temp_response.values():
         test['preguntas'] = list(test['preguntas'].values())
         response.append(test)
 
     if response:
-        return  make_response(jsonify ({
+        return make_response(jsonify({
             'message': 'Todos los test completos',
             'status': 200,
-            'data': response}),200)
+            'data': response}), 200)
     else:
-        return  make_response(jsonify({'message': 'No se encontraron datos', 'status': 404}),200)
+        return make_response(jsonify({'message': 'No se encontraron datos', 'status': 404}), 200)
+
+
 @test_routes.route('/test/all/<int:id>', methods=['GET'])
 def get_all_test(id):
     response = []
@@ -121,7 +128,7 @@ def get_all_test(id):
         .where(Tests.test_id == id)
         .join(Preguntas, Preguntas.test_id == Tests.test_id)
         .outerjoin(Opciones, Opciones.pregunta_id == Preguntas.pregunta_id)
-        .join(Opciones_predeterminadas,Opciones_predeterminadas.op_pre_id == Opciones.op_pre_id)
+        .join(Opciones_predeterminadas, Opciones_predeterminadas.op_pre_id == Opciones.op_pre_id)
         .all()
     )
 
@@ -151,18 +158,50 @@ def get_all_test(id):
             temp_response[test_id]["preguntas"][pregunta_id]["opciones"].append({
                 "opcion_id": row.opcion_id,
                 "op_pre_id": row.op_pre_id,
-                "nombre" : row.nombre
+                "nombre": row.nombre
             })
-
 
     for test in temp_response.values():
         test['preguntas'] = list(test['preguntas'].values())
         response.append(test)
 
     if response:
-        return  make_response(jsonify ({
+        return make_response(jsonify({
             'message': 'Todos los test completos',
             'status': 200,
-            'data': response}),200)
+            'data': response}), 200)
     else:
-        return  make_response(jsonify({'message': 'No se encontraron datos', 'status': 404}),200)
+        return make_response(jsonify({'message': 'No se encontraron datos', 'status': 404}), 200)
+
+
+@test_routes.route('/test/responder', methods=['POST'])
+def responder():
+    try:
+        fecha_fin = request.json.get('fecha_fin')
+        preguntas = request.json.get('preguntas')
+        usuario_id = request.json.get('usuario_id')
+        if not all([fecha_fin, preguntas, usuario_id]):
+            return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
+        if any('pregunta_id' not in pregunta or 'opcion_id' not in pregunta for pregunta in preguntas):
+            return make_response(jsonify({'message': 'Faltan datos en las preguntas', 'status': 400}), 200)
+        # Aquí podrías procesar las preguntas
+        for pregunta in preguntas:
+            pregunta_id = pregunta['pregunta_id']
+            opcion_id = pregunta['opcion_id']
+            print(f"pregunta_id: {pregunta_id}, opcion_id: {opcion_id}")
+            # Aquí podrías guardar esta información en la base de datos
+            new_respuesta = Respuestas(pregunta_id, opcion_id)
+            db.session.add(new_respuesta)
+            db.session.commit()
+            result = respuesta_schema.dump(new_respuesta)
+            new_respuesta_usuario = Respuesta_Usuario(usuario_id,result['respuesta_id'],fecha_fin)
+            db.session.commit()
+
+        data = {
+            'message': 'Respuesta Guardada',
+            'status': 201,
+        }
+        return make_response(jsonify(data), 200)
+    except Exception as e:
+        db.session.rollback()
+        return make_response(jsonify({'message': 'Error al guardar respuesta', 'status': 500}), 200)
