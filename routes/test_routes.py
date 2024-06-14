@@ -199,7 +199,7 @@ def responder():
 
         data = {
             'message': 'Respuesta Guardada',
-            'status': 201,
+            'status': 200,
         }
         return make_response(jsonify(data), 200)
     except Exception as e:
