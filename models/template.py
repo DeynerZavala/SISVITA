@@ -1,7 +1,7 @@
 from utils.db import db
 
 
-class Template(db.Model):
+class Templates(db.Model):
     __tablename__ = 'template'
 
     template_id = db.Column(db.Integer, primary_key=True)

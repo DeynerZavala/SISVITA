@@ -6,6 +6,6 @@ class UsuariosSchema(ma.SQLAlchemyAutoSchema):
         model = Usuarios
         fields = ('usuario_id','nombre','apellido_paterno',
                   'apellido_materno','correo_electronico',
-                  'contrasena','fecha_registro')
+                  'contrasena','fecha_registro', 'ubigeo')
 usuario_schema = UsuariosSchema()
 usuarios_schema = UsuariosSchema(many=True)

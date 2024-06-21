@@ -3,7 +3,7 @@ from utils.ma import ma
 class OpcionesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Opciones
-        fields = ('opciones_id','pregunta_id','textoopcion','escorrecta')
+        fields = ('opcion_id','pregunta_id','op_pre_id','valor')
 
 opcion_schema = OpcionesSchema()
 opciones_schema = OpcionesSchema(many=True)

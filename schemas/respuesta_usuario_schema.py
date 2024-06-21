@@ -4,6 +4,6 @@ from utils.ma import ma
 class Respuesta_UsuarioSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Respuesta_Usuario
-        fields = ('respuesta_id','pregunta_id','opcion_id','es_correcto')
+        fields = ('res_user_id', 'usuario_id', 'diagnostico_id','fecha_fin', 'puntuacion')
 respuesta_usuario_schema = Respuesta_UsuarioSchema()
 respuestas_usuario_schema =Respuesta_UsuarioSchema(many=True)
