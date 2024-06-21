@@ -1,5 +1,7 @@
 import sqlalchemy
 from flask import Blueprint, make_response, jsonify, request
+from sqlalchemy import func
+from sqlalchemy.sql.operators import and_
 
 from models.opciones import Opciones
 from models.opciones_predeterminadas import Opciones_predeterminadas
@@ -8,9 +10,12 @@ from models.respuesta import Respuestas
 from models.respuesta_usuario import Respuesta_Usuario
 from models.template import Templates
 from models.tests import Tests
+from models.usuarios import Usuarios
 from schemas.respuesta_schema import respuesta_schema
-from schemas.respuesta_usuario_schema import respuesta_usuario_schema
+from schemas.respuesta_usuario_schema import respuesta_usuario_schema, respuestas_usuario_schema
+from schemas.template_schema import template_schema, templates_schema, TemplatesSchema
 from schemas.tests_schema import tests_schema, test_schema
+from schemas.usuarios_schema import usuarios_schema
 from utils.db import db
 
 test_routes = Blueprint('test_routes', __name__)
@@ -176,10 +181,6 @@ def get_all_test(id):
         return make_response(jsonify({'message': 'No se encontraron datos', 'status': 404}), 200)
 
 
-
-
-
-
 @test_routes.route('/test/responder', methods=['POST'])
 def responder():
     try:
@@ -193,17 +194,17 @@ def responder():
 
         new_respuesta_usuario = Respuesta_Usuario(usuario_id=usuario_id, fecha_fin=fecha_fin, puntuacion=0)
         db.session.add(new_respuesta_usuario)
-        #db.session.commit()
+        # db.session.commit()
         puntaje = 0
 
         for pregunta in preguntas:
             opcion_id = pregunta['opcion_id']
             opcion = Opciones.query.filter_by(opcion_id=opcion_id).first()
-            puntaje+= opcion.valor
+            puntaje += opcion.valor
 
-            new_respuesta = Respuestas(opcion_id=opcion_id,res_user_id=new_respuesta_usuario.res_user_id)
+            new_respuesta = Respuestas(opcion_id=opcion_id, res_user_id=new_respuesta_usuario.res_user_id)
             db.session.add(new_respuesta)
-            #db.session.commit()
+            # db.session.commit()
 
         new_respuesta_usuario.puntuacion = puntaje
         db.session.add(new_respuesta_usuario)
@@ -214,11 +215,11 @@ def responder():
             Templates.max.label('max'),
             Templates.min.label('min'),
         )
-            .where(Preguntas.pregunta_id == pregunta['pregunta_id'])
-            .where(Preguntas.test_id == Tests.test_id)
-            .where(Tests.test_id == Templates.test_id)
-            .all()
-        )
+                     .where(Preguntas.pregunta_id == pregunta['pregunta_id'])
+                     .where(Preguntas.test_id == Tests.test_id)
+                     .where(Tests.test_id == Templates.test_id)
+                     .all()
+                     )
         for row in templates:
             min = row.min
             max = row.max
@@ -228,7 +229,7 @@ def responder():
         data = {
             'message': 'Respuesta Guardada',
             'puntuacion': puntaje,
-            'semaforo' : semaforo,
+            'semaforo': semaforo,
             'status': 200,
         }
         db.session.commit()
@@ -238,3 +239,58 @@ def responder():
         db.session.rollback()
         print(e)
         return make_response(jsonify({'message': 'Error al guardar respuesta', 'status': 500}), 200)
+
+
+@test_routes.route('/test/mapadecalor', methods=['GET'])
+def getTestResuelto():
+    user_responses = (
+        db.session.query(
+            Usuarios.usuario_id.label('usuario_id'),
+            Usuarios.ubigeo.label('ubigeo'),
+            Respuesta_Usuario.puntuacion.label('puntuacion'),
+            Templates.estado.label('estado'),
+            Templates.max.label('max'),
+            Templates.min.label('min'),
+            Templates.template_id.label('template_id'),
+            Templates.test_id.label('test_id')
+        )
+        .join(Respuesta_Usuario, Usuarios.usuario_id == Respuesta_Usuario.usuario_id)
+        .join(Respuestas, Respuestas.res_user_id == Respuesta_Usuario.res_user_id)
+        .join(Opciones, Opciones.opcion_id == Respuestas.opcion_id)
+        .join(Preguntas, Preguntas.pregunta_id == Opciones.pregunta_id)
+        .join(Tests, Tests.test_id == Preguntas.test_id)
+        .join(Templates, Templates.test_id == Tests.test_id)
+        .where(and_(
+            Templates.min <= Respuesta_Usuario.puntuacion,
+            Templates.max >= Respuesta_Usuario.puntuacion
+        ))
+        .group_by(
+            Usuarios.usuario_id,
+            Usuarios.ubigeo,
+            Respuesta_Usuario.puntuacion,
+            Templates.estado,
+            Templates.max,
+            Templates.min,
+            Templates.template_id,
+            Templates.test_id
+        )
+        .all()
+    )
+
+    response =[]
+    for row in user_responses:
+        max_value = db.session.query(func.max(Templates.max)).filter_by(test_id=row.test_id).scalar()
+        response.append ( {
+            'puntuacion': row.puntuacion,
+            'estado': row.estado,
+            'ubigeo': row.ubigeo,
+            'maximo': max_value
+        })
+    data = {
+        'message': 'Respuesta Guardada',
+        'data': response,
+        'status': 200,
+    }
+    db.session.commit()
+
+    return make_response(jsonify(data), 200)

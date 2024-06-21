@@ -5,6 +5,6 @@ class TemplatesSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Templates
         fields = ('template_id','min',
-                  'max')
+                  'max','test_id')
 template_schema = TemplatesSchema()
 templates_schema = TemplatesSchema(many=True)
