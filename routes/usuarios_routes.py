@@ -157,11 +157,11 @@ def login():
     usuario = Usuarios.query.filter_by(correo_electronico=correo_electronico).first()
     if usuario and check_password_hash(usuario.contrasena, contrasena):
         result = usuario_schema.dump(usuario)
-        return make_response(jsonify({'message': 'Inicio de sesión exitoso', 'status': 200, 'data': result}), 200)
+        return make_response(jsonify({'message': 'Inicio de sesión exitoso', 'status': 200, 'data': result, 'rol': "Usuario"}), 200)
 
     especialista = Especialistas.query.filter_by(correo_electronico=correo_electronico).first()
     if especialista and check_password_hash(especialista.contrasena, contrasena):
         result = especialista_schema.dump(especialista)
-        return make_response(jsonify({'message': 'Inicio de sesión exitoso', 'status': 200, 'data': result}), 200)
+        return make_response(jsonify({'message': 'Inicio de sesión exitoso', 'status': 200, 'data': result, 'rol': "Especialista"}), 200)
 
     return make_response(jsonify({'message': 'Credenciales inválidas', 'status': 400}), 200)
