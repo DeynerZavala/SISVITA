@@ -17,9 +17,10 @@ def create_usuario():
     apellido_materno = request.json.get('apellido_materno')
     correo_electronico = request.json.get('correo_electronico')
     contrasena = request.json.get('contrasena')
+    ubigeo = request.json.get('ubigeo')
 
     # Validar que los datos requeridos estén presentes
-    if not all([nombre, apellido_paterno, correo_electronico, contrasena]):
+    if not all([nombre, apellido_paterno, correo_electronico, contrasena,ubigeo]):
         return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
 
     existing_usuario = Usuarios.query.filter_by(correo_electronico=correo_electronico).first()
@@ -39,7 +40,8 @@ def create_usuario():
         apellido_materno=apellido_materno,
         correo_electronico=correo_electronico,
         contrasena=hashed_contrasena,
-        fecha_registro=datetime.now()  # Usar la fecha y hora actual con zona horaria
+        fecha_registro=datetime.now(),
+        ubigeo=ubigeo# Usar la fecha y hora actual con zona horaria
     )
 
     try:

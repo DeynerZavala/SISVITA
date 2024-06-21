@@ -14,8 +14,8 @@ class Usuarios(db.Model):
     apellido_materno = db.Column(db.String(255))
     ubigeo = db.Column(db.Integer)
 
-    def __init__(self, usuario_id, nombre, apellido_paterno, apellido_materno,
-                 correo_electronico, contrasena, fecha_registro, ubigeo):
+    def __init__(self, nombre, apellido_paterno, apellido_materno,
+                 correo_electronico, contrasena, fecha_registro, ubigeo, usuario_id= None):
         self.usuario_id = usuario_id
         self.nombre = nombre
         self.apellido_paterno = apellido_paterno
