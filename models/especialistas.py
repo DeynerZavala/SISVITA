@@ -1,3 +1,5 @@
+from sqlalchemy import func
+
 from utils.db import db
 
 
@@ -7,16 +9,15 @@ class Especialistas(db.Model):
     nombre = db.Column(db.String(255))
     apellido_paterno = db.Column(db.String(255))
     apellido_materno = db.Column(db.String(255))
-    titulo_id = db.Column(db.Integer(), db.ForeignKey('titulo.titulo_id'))
+    titulo_id = db.Column(db.Integer())
     correo_electronico = db.Column(db.String(255))
     contrasena = db.Column(db.String(255))
-    fecha_registro = db.Column(db.Date())
+    fecha_registro = db.Column(db.TIMESTAMP(timezone=True), nullable=True, default=func.now())
     ubigeo = db.Column(db.Integer())
 
-    def __init__(self, especialista_id, nombre, apellido_paterno,
+    def __init__(self, nombre, apellido_paterno,
                  apellido_materno, titulo_id, correo_electronico,
                  contrasena, fecha_registro, ubigeo):
-        self.especialista_id = especialista_id
         self.nombre = nombre
         self.apellido_paterno = apellido_paterno
         self.apellido_materno = apellido_materno

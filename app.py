@@ -5,6 +5,7 @@ from routes.opciones_routes import opciones_routes
 from routes.preguntas_routes import preguntas_routes
 from routes.test_routes import test_routes
 from routes.especialistas_routes import especialistas_routes
+from routes.titulo_routes import titulo_routes
 from routes.usuarios_routes import usuarios_routes
 from config import DATABASE_CONNECTION_URI
 from utils.db import db
@@ -28,6 +29,8 @@ app.register_blueprint(especialistas_routes)
 app.register_blueprint(test_routes)
 app.register_blueprint(preguntas_routes)
 app.register_blueprint(opciones_routes)
+app.register_blueprint(titulo_routes)
+
 
 @app.route('/')
 def hello_world():  # put application's code here

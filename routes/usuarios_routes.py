@@ -26,6 +26,9 @@ def create_usuario():
     if existing_usuario:
         return make_response(jsonify({'message': 'Correo electrónico ya registrado', 'status': 400}), 200)
 
+    existing_especialista= Especialistas.query.filter_by(correo_electronico=correo_electronico).first()
+    if existing_especialista:
+        return make_response(jsonify({'message': 'Correo electrónico ya registrado', 'status': 400}), 200)
     # Hash de la contraseña usando pbkdf2:sha256
     hashed_contrasena = generate_password_hash(contrasena, method='pbkdf2:sha256')
 
@@ -142,32 +145,21 @@ def delete_usuario(id):
 @usuarios_routes.route('/usuarios/login', methods=['POST'])
 def login():
     data = request.json
-    if not data or not 'correo_electronico' in data or not 'contrasena' in data:
-        return make_response(jsonify({'message': 'Credenciales incompletas','status': 400}), 200)
+
+    if not data or 'correo_electronico' not in data or 'contrasena' not in data:
+        return make_response(jsonify({'message': 'Credenciales incompletas', 'status': 400}), 200)
 
     correo_electronico = data['correo_electronico']
     contrasena = data['contrasena']
 
     usuario = Usuarios.query.filter_by(correo_electronico=correo_electronico).first()
-    if not usuario or not check_password_hash(usuario.contrasena, contrasena):
-        especialista = Especialistas.query.filter_by(correo_electronico=correo_electronico).first()
-        if not especialista or check_password_hash(especialista.contrasena, contrasena):
-            return make_response(jsonify({'message': 'Credenciales inválidas', 'status': 400}), 200)
+    if usuario and check_password_hash(usuario.contrasena, contrasena):
+        result = usuario_schema.dump(usuario)
+        return make_response(jsonify({'message': 'Inicio de sesión exitoso', 'status': 200, 'data': result}), 200)
+
+    especialista = Especialistas.query.filter_by(correo_electronico=correo_electronico).first()
+    if especialista and check_password_hash(especialista.contrasena, contrasena):
         result = especialista_schema.dump(especialista)
+        return make_response(jsonify({'message': 'Inicio de sesión exitoso', 'status': 200, 'data': result}), 200)
 
-        data = {
-            'message': 'Inicio de sesión exitoso',
-            'status': 200,
-            'data': result
-        }
-        return make_response(jsonify(data), 200)
-
-
-    result = usuario_schema.dump(usuario)
-
-    data = {
-        'message': 'Inicio de sesión exitoso',
-        'status': 200,
-        'data': result
-    }
-    return make_response(jsonify(data), 200)
+    return make_response(jsonify({'message': 'Credenciales inválidas', 'status': 400}), 200)
