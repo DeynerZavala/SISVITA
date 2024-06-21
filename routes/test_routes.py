@@ -6,6 +6,7 @@ from models.opciones_predeterminadas import Opciones_predeterminadas
 from models.preguntas import Preguntas
 from models.respuesta import Respuestas
 from models.respuesta_usuario import Respuesta_Usuario
+from models.template import Templates
 from models.tests import Tests
 from schemas.respuesta_schema import respuesta_schema
 from schemas.respuesta_usuario_schema import respuesta_usuario_schema
@@ -175,6 +176,10 @@ def get_all_test(id):
         return make_response(jsonify({'message': 'No se encontraron datos', 'status': 404}), 200)
 
 
+
+
+
+
 @test_routes.route('/test/responder', methods=['POST'])
 def responder():
     try:
@@ -202,11 +207,32 @@ def responder():
 
         new_respuesta_usuario.puntuacion = puntaje
         db.session.add(new_respuesta_usuario)
-        db.session.commit()
+
+        templates = (db.session.query(
+            Templates.template_id.label('template_id'),
+            Templates.estado.label('estado'),
+            Templates.max.label('max'),
+            Templates.min.label('min'),
+        )
+            .where(Preguntas.pregunta_id == pregunta['pregunta_id'])
+            .where(Preguntas.test_id == Tests.test_id)
+            .where(Tests.test_id == Templates.test_id)
+            .all()
+        )
+        for row in templates:
+            min = row.min
+            max = row.max
+            if (puntaje <= max and puntaje >= min):
+                semaforo = row.estado
+                break
         data = {
             'message': 'Respuesta Guardada',
+            'puntuacion': puntaje,
+            'semaforo' : semaforo,
             'status': 200,
         }
+        db.session.commit()
+
         return make_response(jsonify(data), 200)
     except Exception as e:
         db.session.rollback()
