@@ -3,13 +3,13 @@ from models.especialistas import Especialistas
 
 
 class Foros(db.Model):
-    __tablename__ = 'Foros'
+    __tablename__ = 'foros'
     
     foro_id = db.Column(db.Integer, primary_key=True)
-    especialista_id = db.Column(db.Integer, db.ForeignKey('Especialistas.especialista_id'), nullable=False)
-    tema = db.Column(db.String(100), nullable=True)
+    especialista_id = db.Column(db.Integer, db.ForeignKey('especialistas.especialista_id'), nullable=False)
+    tema = db.Column(db.String(255), nullable=True)
     descripcion = db.Column(db.Text, nullable=True)
-    fecha_creacion = db.Column(db.Date, nullable=True)
+    fecha_creacion = db.Column(db.TIMESTAMP(timezone=True), nullable=False)
 
     def __init__(self, foro_id, especialista_id, tema, descripcion, fecha_creacion):
         self.foro_id = foro_id

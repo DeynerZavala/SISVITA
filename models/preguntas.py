@@ -7,8 +7,9 @@ class Preguntas(db.Model):
     
     pregunta_id = db.Column(db.Integer, primary_key=True)
     textopregunta = db.Column(db.Text, nullable=False)
+    test_id = db.Column(db.Integer, db.ForeignKey('tests.test_id'))
 
-    test_id = db.Column(db.Integer, db.ForeignKey('Tests.test_id'))
+
     def __init__(self, pregunta_id, test_id, textopregunta):
         self.pregunta_id = pregunta_id
         self.test_id = test_id

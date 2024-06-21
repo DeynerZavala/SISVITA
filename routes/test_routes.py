@@ -184,11 +184,9 @@ def responder():
             return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
         if any('pregunta_id' not in pregunta or 'opcion_id' not in pregunta for pregunta in preguntas):
             return make_response(jsonify({'message': 'Faltan datos en las preguntas', 'status': 400}), 200)
-        # Aquí podrías procesar las preguntas
         for pregunta in preguntas:
             pregunta_id = pregunta['pregunta_id']
             opcion_id = pregunta['opcion_id']
-            # Aquí podrías guardar esta información en la base de datos
             new_respuesta = Respuestas(pregunta_id, opcion_id)
             db.session.add(new_respuesta)
             db.session.commit()

@@ -6,13 +6,13 @@ from models.usuarios import Usuarios
 
 
 class MensajesForos(db.Model):
-    __tablename__ = 'Mensajes_Foros'
+    __tablename__ = 'mensajes_foros'
     
     mensaje_id = db.Column(db.Integer, primary_key=True)
-    foro_id = db.Column(db.Integer, db.ForeignKey('Foros.foro_id'), nullable=True)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('Usuarios.usuario_id'), nullable=True)
+    foro_id = db.Column(db.Integer, db.ForeignKey('foros.foro_id'), nullable=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.usuario_id'), nullable=True)
     contenido = db.Column(db.Text, nullable=True)
-    fecha_publicacion = db.Column(db.Date, nullable=True)
+    fecha_publicacion = db.Column(db.TIMESTAMP(timezone=True), nullable=False)
 
     def __init__(self, mensaje_id, foro_id, usuario_id, contenido, fecha_publicacion):
         self.mensaje_id = mensaje_id
