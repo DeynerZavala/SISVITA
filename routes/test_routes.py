@@ -1,3 +1,4 @@
+import sqlalchemy
 from flask import Blueprint, make_response, jsonify, request
 
 from models.opciones import Opciones
@@ -184,17 +185,24 @@ def responder():
             return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
         if any('pregunta_id' not in pregunta or 'opcion_id' not in pregunta for pregunta in preguntas):
             return make_response(jsonify({'message': 'Faltan datos en las preguntas', 'status': 400}), 200)
-        for pregunta in preguntas:
-            pregunta_id = pregunta['pregunta_id']
-            opcion_id = pregunta['opcion_id']
-            new_respuesta = Respuestas(pregunta_id, opcion_id)
-            db.session.add(new_respuesta)
-            db.session.commit()
-            result = respuesta_schema.dump(new_respuesta)
-            new_respuesta_usuario = Respuesta_Usuario(usuario_id,result['respuesta_id'],fecha_fin)
-            db.session.add(new_respuesta_usuario)
-            db.session.commit()
 
+        new_respuesta_usuario = Respuesta_Usuario(usuario_id=usuario_id, fecha_fin=fecha_fin, puntuacion=0)
+        db.session.add(new_respuesta_usuario)
+        #db.session.commit()
+        puntaje = 0
+
+        for pregunta in preguntas:
+            opcion_id = pregunta['opcion_id']
+            opcion = Opciones.query.filter_by(opcion_id=opcion_id).first()
+            puntaje+= opcion.valor
+
+            new_respuesta = Respuestas(opcion_id=opcion_id,res_user_id=new_respuesta_usuario.res_user_id)
+            db.session.add(new_respuesta)
+            #db.session.commit()
+
+        new_respuesta_usuario.puntuacion = puntaje
+        db.session.add(new_respuesta_usuario)
+        db.session.commit()
         data = {
             'message': 'Respuesta Guardada',
             'status': 200,
@@ -202,4 +210,5 @@ def responder():
         return make_response(jsonify(data), 200)
     except Exception as e:
         db.session.rollback()
+        print(e)
         return make_response(jsonify({'message': 'Error al guardar respuesta', 'status': 500}), 200)

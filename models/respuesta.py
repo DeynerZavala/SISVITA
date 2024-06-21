@@ -8,7 +8,6 @@ class Respuestas(db.Model):
     opcion_id = db.Column(db.Integer, db.ForeignKey('opciones.opcion_id'))
     res_user_id = db.Column(db.Integer, db.ForeignKey('respuesta_usuario.res_user_id'))
 
-    def __init__(self, pregunta_id, opcion_id, res_user_id):
-        self.pregunta_id = pregunta_id
+    def __init__(self, opcion_id, res_user_id):
         self.opcion_id = opcion_id
         self.res_user_id = res_user_id

@@ -1,6 +1,9 @@
 from datetime import datetime
 from flask import Blueprint, request, make_response, jsonify
+
+from models.especialistas import Especialistas
 from models.usuarios import Usuarios
+from schemas.especialistas_schema import especialista_schema
 from schemas.usuarios_schema import usuarios_schema, usuario_schema
 from utils.db import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -147,7 +150,18 @@ def login():
 
     usuario = Usuarios.query.filter_by(correo_electronico=correo_electronico).first()
     if not usuario or not check_password_hash(usuario.contrasena, contrasena):
-        return make_response(jsonify({'message': 'Credenciales inválidas', 'status': 400}), 200)
+        especialista = Especialistas.query.filter_by(correo_electronico=correo_electronico).first()
+        if not especialista or check_password_hash(especialista.contrasena, contrasena):
+            return make_response(jsonify({'message': 'Credenciales inválidas', 'status': 400}), 200)
+        result = especialista_schema.dump(especialista)
+
+        data = {
+            'message': 'Inicio de sesión exitoso',
+            'status': 200,
+            'data': result
+        }
+        return make_response(jsonify(data), 200)
+
 
     result = usuario_schema.dump(usuario)
 
