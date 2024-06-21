@@ -4,7 +4,7 @@ from utils.db import db
 
 class Citas(db.Model):
     __tablename__ = 'citas'
-    
+    #
     cita_id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.usuario_id'), nullable=False)
     especialista_id = db.Column(db.Integer, db.ForeignKey('especialistas.especialista_id'), nullable=False)
