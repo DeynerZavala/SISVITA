@@ -13,9 +13,8 @@ class Diagnostico(db.Model):
     solicitar_cita = db.Column(db.Boolean)
 
 
-    def __init__(self, diagnostico_id, especialista_id, ansiedad_id, fecha,
+    def __init__(self, especialista_id, ansiedad_id, fecha,
                  observaciones, solicitar_cita):
-        self.diagnostico_id = diagnostico_id
         self.especialista_id = especialista_id
         self.ansiedad_id = ansiedad_id
         self.fecha = fecha

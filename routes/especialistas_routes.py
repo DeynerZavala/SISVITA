@@ -146,3 +146,4 @@ def delete_especialista(id):
         'status': 200,
     }
     return make_response(jsonify(data), 200)
+

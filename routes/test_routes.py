@@ -3,6 +3,8 @@ from flask import Blueprint, make_response, jsonify, request
 from sqlalchemy import func
 from sqlalchemy.sql.operators import and_
 
+from models.ansiedad import Ansiedad
+from models.diagnostico import Diagnostico
 from models.opciones import Opciones
 from models.opciones_predeterminadas import Opciones_predeterminadas
 from models.preguntas import Preguntas
@@ -294,3 +296,52 @@ def getTestResuelto():
     db.session.commit()
 
     return make_response(jsonify(data), 200)
+
+@test_routes.route('/test/vigilancia',methods=['GET'])
+
+def getVigilancia():
+    query = (
+        db.session.query(
+            Usuarios.nombre,
+            Usuarios.apellido_paterno,
+            Usuarios.apellido_materno,
+            Respuesta_Usuario.res_user_id,
+            Respuesta_Usuario.fecha_fin,
+            Respuesta_Usuario.puntuacion,
+            Tests.test_id,
+            Tests.titulo,
+            Templates.estado,
+            Respuesta_Usuario.diagnostico_id,
+            Diagnostico.ansiedad_id,
+            Ansiedad.nivel
+        )
+        .join(Respuesta_Usuario, Respuesta_Usuario.usuario_id == Usuarios.usuario_id)
+        .join(Respuestas, Respuestas.res_user_id == Respuesta_Usuario.res_user_id)
+        .join(Opciones, Opciones.opcion_id == Respuestas.opcion_id)
+        .join(Preguntas, Preguntas.pregunta_id == Opciones.pregunta_id)
+        .join(Tests, Tests.test_id == Preguntas.test_id)
+        .outerjoin(Diagnostico, Diagnostico.diagnostico_id == Respuesta_Usuario.diagnostico_id)
+        .outerjoin(Ansiedad, Ansiedad.ansiedad_id == Diagnostico.ansiedad_id)
+        .join(Templates, Templates.test_id == Tests.test_id)
+        .filter(Respuesta_Usuario.puntuacion.between(Templates.min, Templates.max))
+        .all()
+    )
+    results = []
+    for row in query:
+        result = {
+            'nombre': row.nombre,
+            'apellido_paterno': row.apellido_paterno,
+            'apellido_materno': row.apellido_materno,
+            'res_user_id': row.res_user_id,
+            'fecha_fin': row.fecha_fin,
+            'puntuacion': row.puntuacion,
+            'test_id': row.test_id,
+            'titulo': row.titulo,
+            'estado': row.estado,
+            'diagnostico_id': row.diagnostico_id,
+            'ansiedad_id': row.ansiedad_id,
+            'nivel': row.nivel
+        }
+        results.append(result)
+
+    return make_response(jsonify({'message': 'Datos encontrados', 'status': 200, 'data': results}), 200)
