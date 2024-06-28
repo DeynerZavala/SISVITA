@@ -326,6 +326,16 @@ def getVigilancia():
         .outerjoin(Ansiedad, Ansiedad.ansiedad_id == Diagnostico.ansiedad_id)
         .join(Templates, Templates.test_id == Tests.test_id)
         .filter(Respuesta_Usuario.puntuacion.between(Templates.min, Templates.max))
+        .group_by(
+            Respuesta_Usuario.res_user_id,
+            Usuarios.nombre,
+            Usuarios.apellido_paterno,
+            Usuarios.apellido_materno,
+            Tests.test_id,
+            Templates.estado,
+            Diagnostico.ansiedad_id,
+            Ansiedad.nivel
+        )
         .all()
     )
     results = []
