@@ -245,59 +245,73 @@ def responder():
         return make_response(jsonify({'message': 'Error al guardar respuesta', 'status': 500}), 200)
 
 
-@test_routes.route('/test/mapadecalor', methods=['GET'])
-def getTestResuelto():
-    user_responses = (
-        db.session.query(
-            Usuarios.usuario_id.label('usuario_id'),
-            Usuarios.ubigeo.label('ubigeo'),
-            Respuesta_Usuario.puntuacion.label('puntuacion'),
-            Templates.estado.label('estado'),
-            Templates.max.label('max'),
-            Templates.min.label('min'),
-            Templates.template_id.label('template_id'),
-            Templates.test_id.label('test_id')
-        )
-        .join(Respuesta_Usuario, Usuarios.usuario_id == Respuesta_Usuario.usuario_id)
-        .join(Respuestas, Respuestas.res_user_id == Respuesta_Usuario.res_user_id)
-        .join(Opciones, Opciones.opcion_id == Respuestas.opcion_id)
-        .join(Preguntas, Preguntas.pregunta_id == Opciones.pregunta_id)
-        .join(Tests, Tests.test_id == Preguntas.test_id)
-        .join(Templates, Templates.test_id == Tests.test_id)
-        .where(and_(
-            Templates.min <= Respuesta_Usuario.puntuacion,
-            Templates.max >= Respuesta_Usuario.puntuacion
-        ))
-        .group_by(
-            Usuarios.usuario_id,
-            Usuarios.ubigeo,
-            Respuesta_Usuario.puntuacion,
-            Templates.estado,
-            Templates.max,
-            Templates.min,
-            Templates.template_id,
-            Templates.test_id
-        )
-        .all()
-    )
+@test_routes.route('/test/mapadecalor', methods=['POST'])
+def getMapadeCalor():
+    try:
+        data = request.json.get('data')
+        res_user_ids = [temp['res_user_id'] for temp in data]
 
-    response =[]
-    for row in user_responses:
-        max_value = db.session.query(func.max(Templates.max)).filter_by(test_id=row.test_id).scalar()
-        response.append ( {
-            'puntuacion': row.puntuacion,
-            'estado': row.estado,
-            'ubigeo': row.ubigeo,
-            'maximo': max_value
-        })
-    data = {
-        'message': 'Respuesta Guardada',
-        'data': response,
-        'status': 200,
-    }
-    db.session.commit()
+        user_responses = (
+            db.session.query(
+                Usuarios.usuario_id.label('usuario_id'),
+                Usuarios.ubigeo.label('ubigeo'),
+                Respuesta_Usuario.puntuacion.label('puntuacion'),
+                Respuesta_Usuario.puntuacion.label('res_user_id'),
+                Templates.estado.label('estado'),
+                Templates.max.label('max'),
+                Templates.min.label('min'),
+                Templates.template_id.label('template_id'),
+                Templates.test_id.label('test_id')
+            )
+            .join(Respuesta_Usuario, Usuarios.usuario_id == Respuesta_Usuario.usuario_id)
+            .join(Respuestas, Respuestas.res_user_id == Respuesta_Usuario.res_user_id)
+            .join(Opciones, Opciones.opcion_id == Respuestas.opcion_id)
+            .join(Preguntas, Preguntas.pregunta_id == Opciones.pregunta_id)
+            .join(Tests, Tests.test_id == Preguntas.test_id)
+            .join(Templates, Templates.test_id == Tests.test_id)
+            .filter(
+                Respuesta_Usuario.res_user_id.in_(res_user_ids),
+                and_(
+                    Templates.min <= Respuesta_Usuario.puntuacion,
+                    Templates.max >= Respuesta_Usuario.puntuacion
+                )
+            )
+            .group_by(
+                Usuarios.usuario_id,
+                Usuarios.ubigeo,
+                Respuesta_Usuario.puntuacion,
+                Templates.estado,
+                Templates.max,
+                Templates.min,
+                Templates.template_id,
+                Templates.test_id
+            )
+            .all()
+        )
 
-    return make_response(jsonify(data), 200)
+        response = []
+        for row in user_responses:
+            max_value = db.session.query(func.max(Templates.max)).filter_by(test_id=row.test_id).scalar()
+            response.append({
+                'puntuacion': row.puntuacion,
+                'estado': row.estado,
+                'ubigeo': row.ubigeo,
+                'maximo': max_value,
+                'res_user_id':row.res_user_id
+            })
+
+        data = {
+            'message': 'Respuesta Guardada',
+            'data': response,
+            'status': 200,
+        }
+        db.session.commit()
+
+        return make_response(jsonify(data), 200)
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+        return make_response(jsonify({'message': 'Error', 'status': 200}), 200)
 
 @test_routes.route('/test/vigilancia',methods=['GET'])
 

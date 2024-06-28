@@ -9,5 +9,4 @@ def create_respuesta():
     respuesta_id = request.json.get('respuesta_id')
     fecha_fin = datetime.date.today()
 
-    new_respuesta
 
