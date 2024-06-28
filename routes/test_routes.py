@@ -311,7 +311,7 @@ def getMapadeCalor():
     except Exception as e:
         db.session.rollback()
         print(e)
-        return make_response(jsonify({'message': 'Error', 'status': 200}), 200)
+        return make_response(jsonify({'message': 'Error', 'status': 200}),200)
 
 @test_routes.route('/test/vigilancia',methods=['GET'])
 
