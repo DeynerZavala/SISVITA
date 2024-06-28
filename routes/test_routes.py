@@ -27,6 +27,7 @@ test_routes = Blueprint('test_routes', __name__)
 def get_tests():
     all_usuario = Tests.query.all()
     result = tests_schema.dump(all_usuario)
+    print(result)
     data = {
         'message': 'Todo los test',
         'status': 200,
@@ -87,9 +88,10 @@ def get_all_tests():
                 "test_id": test_id,
                 "titulo": row.titulo,
                 "test_description": row.test_description,
-                "fecha_creacion": row.fecha_creacion,
+                "fecha_creacion": str(row.fecha_creacion),
                 "preguntas": {}
             }
+            print(row.fecha_creacion)
 
         if pregunta_id not in temp_response[test_id]["preguntas"]:
             temp_response[test_id]["preguntas"][pregunta_id] = {
@@ -333,7 +335,7 @@ def getVigilancia():
             'apellido_paterno': row.apellido_paterno,
             'apellido_materno': row.apellido_materno,
             'res_user_id': row.res_user_id,
-            'fecha_fin': row.fecha_fin,
+            'fecha_fin': str(row.fecha_fin),
             'puntuacion': row.puntuacion,
             'test_id': row.test_id,
             'titulo': row.titulo,
