@@ -13,6 +13,7 @@ from models.respuesta import Respuestas
 from models.respuesta_usuario import Respuesta_Usuario
 from models.test_template import Test_Templates
 from models.tests import Tests
+from models.ubigeo import Ubigeo
 from models.usuarios import Usuarios
 from schemas.ansiedad_semaforo_schema import ansiedad_semaforo_schema
 from schemas.respuesta_schema import respuesta_schema
@@ -268,7 +269,9 @@ def getMapadeCalor():
                 Test_Templates.max.label('max'),
                 Test_Templates.min.label('min'),
                 Test_Templates.template_id.label('template_id'),
-                Test_Templates.test_id.label('test_id')
+                Test_Templates.test_id.label('test_id'),
+                Ubigeo.latitud.label('latitud'),
+                Ubigeo.longit.label('longitud'),
             )
             .join(Respuesta_Usuario, Usuarios.usuario_id == Respuesta_Usuario.usuario_id)
             .join(Respuestas, Respuestas.res_user_id == Respuesta_Usuario.res_user_id)
@@ -276,6 +279,7 @@ def getMapadeCalor():
             .join(Preguntas, Preguntas.pregunta_id == Opciones.pregunta_id)
             .join(Tests, Tests.test_id == Preguntas.test_id)
             .join(Test_Templates, Test_Templates.test_id == Tests.test_id)
+            .join(Ubigeo, Ubigeo.ubigeo_id==Usuarios.ubigeo_id)
             .filter(
                 Respuesta_Usuario.res_user_id.in_(res_user_ids),
                 and_(
@@ -304,7 +308,9 @@ def getMapadeCalor():
                 'estado': row.estado,
                 'ubigeo': row.ubigeo,
                 'maximo': max_value,
-                'res_user_id':row.res_user_id
+                'res_user_id':row.res_user_id,
+                'longitud': row.longitud,
+                'latitud': row.latitud
             })
 
         data = {
