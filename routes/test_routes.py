@@ -365,6 +365,7 @@ def getVigilancia():
         .join(Test_Templates, Test_Templates.test_id == Tests.test_id)
         .outerjoin(Ansiedad_Semaforo, Ansiedad_Semaforo.ans_sem_id == Test_Templates.ans_sem_id)
         .filter(Respuesta_Usuario.puntuacion.between(Test_Templates.min, Test_Templates.max))
+        .order_by(Respuesta_Usuario.fecha_fin.desc())
         .group_by(
             Respuesta_Usuario.res_user_id,
             Usuarios.nombre,
