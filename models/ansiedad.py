@@ -6,6 +6,7 @@ class Ansiedad(db.Model):
 
     ansiedad_id = db.Column(db.Integer, primary_key=True)
     nivel = db.Column(db.String(255))
+    ans_sem_id = db.Column(db.Integer)
     
     def __init__(self, nivel):
         self.nivel = nivel

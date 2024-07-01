@@ -4,6 +4,7 @@ from sqlalchemy import func
 from sqlalchemy.sql.operators import and_
 
 from models.ansiedad import Ansiedad
+from models.ansiedad_semaforo import Ansiedad_Semaforo
 from models.diagnostico import Diagnostico
 from models.opciones import Opciones
 from models.opciones_predeterminadas import Opciones_predeterminadas
@@ -218,6 +219,7 @@ def responder():
             Test_Templates.estado.label('estado'),
             Test_Templates.max.label('max'),
             Test_Templates.min.label('min'),
+            Ansiedad_Semaforo.semaforo('semaforo')
         )
                      .where(Preguntas.pregunta_id == pregunta['pregunta_id'])
                      .where(Preguntas.test_id == Tests.test_id)
@@ -228,11 +230,13 @@ def responder():
             min = row.min
             max = row.max
             if (puntaje <= max and puntaje >= min):
-                semaforo = row.estado
+                estado = row.estado
+                semaforo = row.semaforo
                 break
         data = {
             'message': 'Respuesta Guardada',
             'puntuacion': puntaje,
+            'estado': estado,
             'semaforo': semaforo,
             'status': 200,
         }
