@@ -265,13 +265,14 @@ def getMapadeCalor():
                 Usuarios.ubigeo.label('ubigeo'),
                 Respuesta_Usuario.puntuacion.label('puntuacion'),
                 Respuesta_Usuario.puntuacion.label('res_user_id'),
-                Test_Templates.estado.label('estado'),
                 Test_Templates.max.label('max'),
                 Test_Templates.min.label('min'),
                 Test_Templates.template_id.label('template_id'),
                 Test_Templates.test_id.label('test_id'),
                 Ubigeo.latitud.label('latitud'),
-                Ubigeo.longit.label('longitud'),
+                Ubigeo.longitud.label('longitud'),
+                Ansiedad_Semaforo.semaforo.label('nivel_semaforo'),
+                Diagnostico.ansiedad_id.label('ansiedad_id')
             )
             .join(Respuesta_Usuario, Usuarios.usuario_id == Respuesta_Usuario.usuario_id)
             .join(Respuestas, Respuestas.res_user_id == Respuesta_Usuario.res_user_id)
@@ -279,7 +280,9 @@ def getMapadeCalor():
             .join(Preguntas, Preguntas.pregunta_id == Opciones.pregunta_id)
             .join(Tests, Tests.test_id == Preguntas.test_id)
             .join(Test_Templates, Test_Templates.test_id == Tests.test_id)
-            .join(Ubigeo, Ubigeo.ubigeo_id==Usuarios.ubigeo_id)
+            .join(Ubigeo, Ubigeo.ubigeo_id == Usuarios.ubigeo)
+            .join(Ansiedad_Semaforo, Ansiedad_Semaforo.ans_sem_id == Test_Templates.ans_sem_id)
+            .outerjoin(Diagnostico,Diagnostico.diagnostico_id == Respuesta_Usuario.diagnostico_id)
             .filter(
                 Respuesta_Usuario.res_user_id.in_(res_user_ids),
                 and_(
@@ -295,20 +298,27 @@ def getMapadeCalor():
                 Test_Templates.max,
                 Test_Templates.min,
                 Test_Templates.template_id,
-                Test_Templates.test_id
+                Test_Templates.test_id,
+                Ubigeo.latitud,
+                Ubigeo.longitud,
+                Diagnostico.ansiedad_id,
+                Ansiedad_Semaforo.semaforo,
             )
             .all()
         )
-
         response = []
         for row in user_responses:
+            if (row.ansiedad_id != None):
+                temp = Ansiedad_Semaforo.query.filter_by(ans_sem_id=row.semaforo_ansiedad_id).first()
+                temp = ansiedad_semaforo_schema.dump(temp)
+                row.nivel_semaforo = temp.semaforo
             max_value = db.session.query(func.max(Test_Templates.max)).filter_by(test_id=row.test_id).scalar()
             response.append({
                 'puntuacion': row.puntuacion,
-                'estado': row.estado,
                 'ubigeo': row.ubigeo,
+                'nivel_semaforo': row.nivel_semaforo,
                 'maximo': max_value,
-                'res_user_id':row.res_user_id,
+                'res_user_id': row.res_user_id,
                 'longitud': row.longitud,
                 'latitud': row.latitud
             })
@@ -319,15 +329,14 @@ def getMapadeCalor():
             'status': 200,
         }
         db.session.commit()
-
         return make_response(jsonify(data), 200)
     except Exception as e:
         db.session.rollback()
         print(e)
-        return make_response(jsonify({'message': 'Error', 'status': 200}),200)
+        return make_response(jsonify({'message': 'Error', 'status': 200}), 200)
 
-@test_routes.route('/test/vigilancia',methods=['GET'])
 
+@test_routes.route('/test/vigilancia', methods=['GET'])
 def getVigilancia():
     query = (
         db.session.query(
@@ -371,10 +380,10 @@ def getVigilancia():
     )
     results = []
     for row in query:
-        if(row.ansiedad_id != None):
+        if (row.ansiedad_id != None):
             temp = Ansiedad_Semaforo.query.filter_by(ans_sem_id=row.semaforo_ansiedad_id).first()
             temp = ansiedad_semaforo_schema.dump(temp)
-            row.semaforo_nivel =temp.semaforo
+            row.semaforo_nivel = temp.semaforo
         result = {
             'nombre': row.nombre,
             'apellido_paterno': row.apellido_paterno,
