@@ -10,12 +10,12 @@ from models.opciones_predeterminadas import Opciones_predeterminadas
 from models.preguntas import Preguntas
 from models.respuesta import Respuestas
 from models.respuesta_usuario import Respuesta_Usuario
-from models.template import Templates
+from models.test_template import Test_Templates
 from models.tests import Tests
 from models.usuarios import Usuarios
 from schemas.respuesta_schema import respuesta_schema
 from schemas.respuesta_usuario_schema import respuesta_usuario_schema, respuestas_usuario_schema
-from schemas.template_schema import template_schema, templates_schema, TemplatesSchema
+from schemas.test_template_schema import test_template_schema, test_templates_schema, Test_TemplatesSchema
 from schemas.tests_schema import tests_schema, test_schema
 from schemas.usuarios_schema import usuarios_schema
 from utils.db import db
@@ -214,14 +214,14 @@ def responder():
         db.session.add(new_respuesta_usuario)
 
         templates = (db.session.query(
-            Templates.template_id.label('template_id'),
-            Templates.estado.label('estado'),
-            Templates.max.label('max'),
-            Templates.min.label('min'),
+            Test_Templates.template_id.label('template_id'),
+            Test_Templates.estado.label('estado'),
+            Test_Templates.max.label('max'),
+            Test_Templates.min.label('min'),
         )
                      .where(Preguntas.pregunta_id == pregunta['pregunta_id'])
                      .where(Preguntas.test_id == Tests.test_id)
-                     .where(Tests.test_id == Templates.test_id)
+                     .where(Tests.test_id == Test_Templates.test_id)
                      .all()
                      )
         for row in templates:
@@ -257,41 +257,41 @@ def getMapadeCalor():
                 Usuarios.ubigeo.label('ubigeo'),
                 Respuesta_Usuario.puntuacion.label('puntuacion'),
                 Respuesta_Usuario.puntuacion.label('res_user_id'),
-                Templates.estado.label('estado'),
-                Templates.max.label('max'),
-                Templates.min.label('min'),
-                Templates.template_id.label('template_id'),
-                Templates.test_id.label('test_id')
+                Test_Templates.estado.label('estado'),
+                Test_Templates.max.label('max'),
+                Test_Templates.min.label('min'),
+                Test_Templates.template_id.label('template_id'),
+                Test_Templates.test_id.label('test_id')
             )
             .join(Respuesta_Usuario, Usuarios.usuario_id == Respuesta_Usuario.usuario_id)
             .join(Respuestas, Respuestas.res_user_id == Respuesta_Usuario.res_user_id)
             .join(Opciones, Opciones.opcion_id == Respuestas.opcion_id)
             .join(Preguntas, Preguntas.pregunta_id == Opciones.pregunta_id)
             .join(Tests, Tests.test_id == Preguntas.test_id)
-            .join(Templates, Templates.test_id == Tests.test_id)
+            .join(Test_Templates, Test_Templates.test_id == Tests.test_id)
             .filter(
                 Respuesta_Usuario.res_user_id.in_(res_user_ids),
                 and_(
-                    Templates.min <= Respuesta_Usuario.puntuacion,
-                    Templates.max >= Respuesta_Usuario.puntuacion
+                    Test_Templates.min <= Respuesta_Usuario.puntuacion,
+                    Test_Templates.max >= Respuesta_Usuario.puntuacion
                 )
             )
             .group_by(
                 Usuarios.usuario_id,
                 Usuarios.ubigeo,
                 Respuesta_Usuario.puntuacion,
-                Templates.estado,
-                Templates.max,
-                Templates.min,
-                Templates.template_id,
-                Templates.test_id
+                Test_Templates.estado,
+                Test_Templates.max,
+                Test_Templates.min,
+                Test_Templates.template_id,
+                Test_Templates.test_id
             )
             .all()
         )
 
         response = []
         for row in user_responses:
-            max_value = db.session.query(func.max(Templates.max)).filter_by(test_id=row.test_id).scalar()
+            max_value = db.session.query(func.max(Test_Templates.max)).filter_by(test_id=row.test_id).scalar()
             response.append({
                 'puntuacion': row.puntuacion,
                 'estado': row.estado,
@@ -326,7 +326,7 @@ def getVigilancia():
             Respuesta_Usuario.puntuacion,
             Tests.test_id,
             Tests.titulo,
-            Templates.estado,
+            Test_Templates.estado,
             Respuesta_Usuario.diagnostico_id,
             Diagnostico.ansiedad_id,
             Ansiedad.nivel
@@ -338,15 +338,15 @@ def getVigilancia():
         .join(Tests, Tests.test_id == Preguntas.test_id)
         .outerjoin(Diagnostico, Diagnostico.diagnostico_id == Respuesta_Usuario.diagnostico_id)
         .outerjoin(Ansiedad, Ansiedad.ansiedad_id == Diagnostico.ansiedad_id)
-        .join(Templates, Templates.test_id == Tests.test_id)
-        .filter(Respuesta_Usuario.puntuacion.between(Templates.min, Templates.max))
+        .join(Test_Templates, Test_Templates.test_id == Tests.test_id)
+        .filter(Respuesta_Usuario.puntuacion.between(Test_Templates.min, Test_Templates.max))
         .group_by(
             Respuesta_Usuario.res_user_id,
             Usuarios.nombre,
             Usuarios.apellido_paterno,
             Usuarios.apellido_materno,
             Tests.test_id,
-            Templates.estado,
+            Test_Templates.estado,
             Diagnostico.ansiedad_id,
             Ansiedad.nivel
         )

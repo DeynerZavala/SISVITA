@@ -1,8 +1,8 @@
 from utils.db import db
 
 
-class Templates(db.Model):
-    __tablename__ = 'template'
+class Test_Templates(db.Model):
+    __tablename__ = 'test_template'
 
     template_id = db.Column(db.Integer, primary_key=True)
     min = db.Column(db.Integer)
