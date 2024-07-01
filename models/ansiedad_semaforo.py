@@ -5,7 +5,7 @@ class Ansiedad_Semaforo(db.Model):
     __tablename__ = 'ansiedad_semaforo'
 
     ans_sem_id = db.Column(db.Integer, primary_key=True)
-    semaforo = db.Column(db.Integer)
+    semaforo = db.Column(db.String(255))
 
     def __init__(self, semaforo):
         self.semaforo = semaforo
