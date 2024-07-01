@@ -214,18 +214,20 @@ def responder():
         new_respuesta_usuario.puntuacion = puntaje
         db.session.add(new_respuesta_usuario)
 
-        templates = (db.session.query(
-            Test_Templates.template_id.label('template_id'),
-            Test_Templates.estado.label('estado'),
-            Test_Templates.max.label('max'),
-            Test_Templates.min.label('min'),
-            Ansiedad_Semaforo.semaforo('semaforo')
+        templates = (
+            db.session.query(
+                Test_Templates.template_id.label('template_id'),
+                Test_Templates.estado.label('estado'),
+                Test_Templates.max.label('max'),
+                Test_Templates.min.label('min'),
+                Ansiedad_Semaforo.semaforo.label('semaforo')
+            )
+            .join(Tests, Tests.test_id == Test_Templates.test_id)
+            .join(Preguntas, Preguntas.test_id == Tests.test_id)
+            .join(Ansiedad_Semaforo, Ansiedad_Semaforo.ans_sem_id == Test_Templates.test_id)
+            .where(Preguntas.pregunta_id == pregunta['pregunta_id'])
+            .all()
         )
-                     .where(Preguntas.pregunta_id == pregunta['pregunta_id'])
-                     .where(Preguntas.test_id == Tests.test_id)
-                     .where(Tests.test_id == Test_Templates.test_id)
-                     .all()
-                     )
         for row in templates:
             min = row.min
             max = row.max
