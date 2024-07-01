@@ -14,6 +14,7 @@ from models.respuesta_usuario import Respuesta_Usuario
 from models.test_template import Test_Templates
 from models.tests import Tests
 from models.usuarios import Usuarios
+from schemas.ansiedad_semaforo_schema import ansiedad_semaforo_schema
 from schemas.respuesta_schema import respuesta_schema
 from schemas.respuesta_usuario_schema import respuesta_usuario_schema, respuestas_usuario_schema
 from schemas.test_template_schema import test_template_schema, test_templates_schema, Test_TemplatesSchema
@@ -324,18 +325,20 @@ def getMapadeCalor():
 def getVigilancia():
     query = (
         db.session.query(
-            Usuarios.nombre,
-            Usuarios.apellido_paterno,
-            Usuarios.apellido_materno,
-            Respuesta_Usuario.res_user_id,
-            Respuesta_Usuario.fecha_fin,
-            Respuesta_Usuario.puntuacion,
-            Tests.test_id,
-            Tests.titulo,
-            Test_Templates.estado,
-            Respuesta_Usuario.diagnostico_id,
-            Diagnostico.ansiedad_id,
-            Ansiedad.nivel
+            Usuarios.nombre.label('nombre'),
+            Usuarios.apellido_paterno.label('apellido_paterno'),
+            Usuarios.apellido_materno.label('apellido_materno'),
+            Respuesta_Usuario.res_user_id.label('res_user_id'),
+            Respuesta_Usuario.fecha_fin.label('fecha_fin'),
+            Respuesta_Usuario.puntuacion.label('puntuacion'),
+            Tests.test_id.label('test_id'),
+            Tests.titulo.label('titulo'),
+            Test_Templates.estado.label('test_nivel'),
+            Respuesta_Usuario.diagnostico_id.label('diagnostico_id'),
+            Diagnostico.ansiedad_id.label('ansiedad_id'),
+            Ansiedad.nivel.label('diag_ansiedad_nivel'),
+            Ansiedad.nivel.label('semaforo_ansiedad_id'),
+            Ansiedad_Semaforo.semaforo.label('semaforo_nivel'),
         )
         .join(Respuesta_Usuario, Respuesta_Usuario.usuario_id == Usuarios.usuario_id)
         .join(Respuestas, Respuestas.res_user_id == Respuesta_Usuario.res_user_id)
@@ -345,6 +348,7 @@ def getVigilancia():
         .outerjoin(Diagnostico, Diagnostico.diagnostico_id == Respuesta_Usuario.diagnostico_id)
         .outerjoin(Ansiedad, Ansiedad.ansiedad_id == Diagnostico.ansiedad_id)
         .join(Test_Templates, Test_Templates.test_id == Tests.test_id)
+        .outerjoin(Ansiedad_Semaforo, Ansiedad_Semaforo.ans_sem_id == Test_Templates.ans_sem_id)
         .filter(Respuesta_Usuario.puntuacion.between(Test_Templates.min, Test_Templates.max))
         .group_by(
             Respuesta_Usuario.res_user_id,
@@ -354,12 +358,17 @@ def getVigilancia():
             Tests.test_id,
             Test_Templates.estado,
             Diagnostico.ansiedad_id,
-            Ansiedad.nivel
+            Ansiedad.nivel,
+            Ansiedad_Semaforo.semaforo
         )
         .all()
     )
     results = []
     for row in query:
+        if(row.ansiedad_id != None):
+            temp = Ansiedad_Semaforo.query.filter_by(ans_sem_id=row.semaforo_ansiedad_id).first()
+            temp = ansiedad_semaforo_schema.dump(temp)
+            row.semaforo_nivel =temp.semaforo
         result = {
             'nombre': row.nombre,
             'apellido_paterno': row.apellido_paterno,
@@ -369,10 +378,11 @@ def getVigilancia():
             'puntuacion': row.puntuacion,
             'test_id': row.test_id,
             'titulo': row.titulo,
-            'estado': row.estado,
+            'test_nivel': row.test_nivel,
             'diagnostico_id': row.diagnostico_id,
             'ansiedad_id': row.ansiedad_id,
-            'nivel': row.nivel
+            'ansiedad_nivel': row.diag_ansiedad_nivel,
+            'semaforo_nivel': row.semaforo_nivel
         }
         results.append(result)
 
