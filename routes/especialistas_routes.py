@@ -41,7 +41,7 @@ def create_especialista():
 
     temp = Ubigeo.query.filter_by(departamento=departamento, provincia=provincia, distrito=distrito).first()
     schema = ubigeo_schema.dump(temp)
-    # Crear una nueva instancia del modelo Especialistas
+    # Crear una nueva instancia del modelo Especialista
     new_especialista = Especialistas(
         nombre=nombre,
         apellido_paterno=apellido_paterno,
