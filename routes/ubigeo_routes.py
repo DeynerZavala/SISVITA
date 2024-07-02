@@ -19,7 +19,7 @@ def get_ubigeos():
 #conseguir departamento, provincia, distrito  unicos
 @ubigeo_routes.route('/departamentos', methods=['GET'])
 def get_departamentos():
-    departamentos = db.session.query(Ubigeo.departamento.distinct()).all()
+    departamentos = db.session.query(Ubigeo.departamento.distinct()).order_by(Ubigeo.departamento).all()
     departamentos = [d[0] for d in departamentos]
     data = {
         'message': "Todos los Departamentos",
@@ -30,7 +30,7 @@ def get_departamentos():
 
 @ubigeo_routes.route('/provincias/<departamento>', methods=['GET'])
 def get_provincias(departamento):
-    provincias = db.session.query(Ubigeo.provincia).filter_by(departamento=departamento).distinct().all()
+    provincias = db.session.query(Ubigeo.provincia).filter_by(departamento=departamento).order_by(Ubigeo.provincia).distinct().all()
     provincias = [p[0] for p in provincias]
     data = {
         'message': f"Provincias en {departamento}",
@@ -41,7 +41,7 @@ def get_provincias(departamento):
 
 @ubigeo_routes.route('/distritos/<provincia>', methods=['GET'])
 def get_distritos(provincia):
-    distritos = db.session.query(Ubigeo.distrito).filter_by(provincia=provincia).distinct().all()
+    distritos = db.session.query(Ubigeo.distrito).filter_by(provincia=provincia).order_by(Ubigeo.distrito).distinct().all()
     distritos = [d[0] for d in distritos]
     data = {
         'message': f"Distritos en {provincia}",
