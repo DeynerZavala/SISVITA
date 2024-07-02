@@ -1,9 +1,12 @@
 from datetime import datetime
 from flask import Blueprint, request, make_response, jsonify
 from models.especialistas import Especialistas
+from models.ubigeo import Ubigeo
 from models.usuarios import Usuarios
 from schemas.especialistas_schema import especialistas_schema, especialista_schema
 from werkzeug.security import generate_password_hash, check_password_hash
+
+from schemas.ubigeo_schema import ubigeo_schema
 from utils.db import db
 
 especialistas_routes = Blueprint('especialistas_routes', __name__)
@@ -17,10 +20,12 @@ def create_especialista():
     correo_electronico = request.json.get('correo_electronico')
     contrasena = request.json.get('contrasena')
     titulo_id = request.json.get('titulo_id')
-    ubigeo = request.json.get('ubigeo')
+    departamento = request.json.get('departamento')
+    provincia = request.json.get('provincia')
+    distrito = request.json.get('distrito')
 
     # Validar que los datos requeridos estén presentes
-    if not all([nombre, apellido_paterno, correo_electronico, contrasena, titulo_id, ubigeo]):
+    if not all([nombre, apellido_paterno, correo_electronico, contrasena, titulo_id, departamento, provincia, distrito]):
         return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
 
     existing_usuario = Usuarios.query.filter_by(correo_electronico=correo_electronico).first()
@@ -34,6 +39,8 @@ def create_especialista():
     # Hash de la contraseña usando pbkdf2:sha256
     hashed_contrasena = generate_password_hash(contrasena, method='pbkdf2:sha256')
 
+    temp = Ubigeo.query.filter_by(departamento=departamento, provincia=provincia, distrito=distrito).first()
+    schema = ubigeo_schema.dump(temp)
     # Crear una nueva instancia del modelo Especialistas
     new_especialista = Especialistas(
         nombre=nombre,
@@ -43,7 +50,7 @@ def create_especialista():
         contrasena=hashed_contrasena,
         fecha_registro=datetime.now(),  # Usar la fecha y hora actual con zona horaria
         titulo_id=titulo_id,
-        ubigeo=ubigeo
+        ubigeo=schema['ubigeo_id']
     )
 
     try:

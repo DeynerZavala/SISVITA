@@ -2,8 +2,10 @@ from datetime import datetime
 from flask import Blueprint, request, make_response, jsonify
 
 from models.especialistas import Especialistas
+from models.ubigeo import Ubigeo
 from models.usuarios import Usuarios
 from schemas.especialistas_schema import especialista_schema
+from schemas.ubigeo_schema import ubigeo_schema
 from schemas.usuarios_schema import usuarios_schema, usuario_schema
 from utils.db import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -17,10 +19,12 @@ def create_usuario():
     apellido_materno = request.json.get('apellido_materno')
     correo_electronico = request.json.get('correo_electronico')
     contrasena = request.json.get('contrasena')
-    ubigeo = request.json.get('ubigeo')
+    departamento = request.json.get('departamento')
+    provincia = request.json.get('provincia')
+    distrito = request.json.get('distrito')
 
     # Validar que los datos requeridos estén presentes
-    if not all([nombre, apellido_paterno, correo_electronico, contrasena,ubigeo]):
+    if not all([nombre, apellido_paterno, correo_electronico, contrasena,departamento, provincia, distrito]):
         return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
 
     existing_usuario = Usuarios.query.filter_by(correo_electronico=correo_electronico).first()
@@ -33,6 +37,9 @@ def create_usuario():
     # Hash de la contraseña usando pbkdf2:sha256
     hashed_contrasena = generate_password_hash(contrasena, method='pbkdf2:sha256')
 
+
+    temp = Ubigeo.query.filter_by(departamento=departamento,provincia=provincia,distrito=distrito).first()
+    schema = ubigeo_schema.dump(temp)
     # Crear una nueva instancia del modelo Usuarios
     new_usuario = Usuarios(
         nombre=nombre,
@@ -40,8 +47,8 @@ def create_usuario():
         apellido_materno=apellido_materno,
         correo_electronico=correo_electronico,
         contrasena=hashed_contrasena,
-        fecha_registro=datetime.now(),
-        ubigeo=ubigeo# Usar la fecha y hora actual con zona horaria
+        fecha_registro=datetime.now(), # Usar la fecha y hora actual con zona horaria
+        ubigeo=schema['ubigeo_id']
     )
 
     try:
