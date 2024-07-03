@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 
+from routes.ansiedad_routes import ansiedad_routes
 from routes.diagnostico_routes import diagnostico_routes
 from routes.ansiedad_semaforo_routes import ansiedad_semaforo_routes
 from routes.opciones_routes import opciones_routes
@@ -36,6 +37,7 @@ app.register_blueprint(titulo_routes)
 app.register_blueprint(ansiedad_semaforo_routes)
 app.register_blueprint(ubigeo_routes)
 app.register_blueprint(diagnostico_routes)
+app.register_blueprint(ansiedad_routes)
 
 @app.route('/')
 def hello_world():  # put application's code here
