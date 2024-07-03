@@ -43,6 +43,7 @@ def get_diagnostico():
 @diagnostico_routes.route('/diagnostico', methods=['POST'])
 def create_diagnostico():
     try:
+        usuario_id = request.json['usuario_id']
         especialista_id = request.json.get('especialista_id')
         ansiedad_id = request.json.get('ansiedad_id')
         fecha = func.now()
@@ -51,7 +52,7 @@ def create_diagnostico():
         tratamiento_id = request.json.get('tratamiento_id')
         fundamentacion_cientifica = request.json.get('fundamentacion_cientifica')
 
-        if not all(especialista_id,ansiedad_id,comunicacion_estudiante,solicitar_cita,tratamiento_id,fundamentacion_cientifica):
+        if not all[especialista_id,ansiedad_id,comunicacion_estudiante,solicitar_cita,tratamiento_id,fundamentacion_cientifica,usuario_id]:
             return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
 
         new_diagnostico = Diagnostico(especialista_id=especialista_id,ansiedad_id=ansiedad_id,fecha=fecha,comunicacion_estudiante=comunicacion_estudiante,
