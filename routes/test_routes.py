@@ -391,10 +391,12 @@ def getVigilancia():
         .all()
     )
     results = []
+
     for row in query:
+        semaforo_final = row.semaforo_nivel
         if (row.ansiedad_id != None):
             temp = Ansiedad_Semaforo.query.filter_by(ans_sem_id=row.ansiedad_id).first()
-            row.semaforo_nivel = temp.semaforo
+            semaforo_final = temp.semaforo
         result = {
             'nombre': row.nombre,
             'apellido_paterno': row.apellido_paterno,
@@ -408,7 +410,7 @@ def getVigilancia():
             'diagnostico_id': row.diagnostico_id,
             'ansiedad_id': row.ansiedad_id,
             'ansiedad_nivel': row.diag_ansiedad_nivel,
-            'semaforo_nivel': row.semaforo_nivel,
+            'semaforo_nivel': semaforo_final,
             'usuario_id': row.usuario_id
         }
         results.append(result)
@@ -470,9 +472,10 @@ def get_vigilancia_by_id(res_user_id):
     )
 
     if query:
-        if query.ansiedad_id is not None:
+        semaforo_final = query.semaforo_nivel
+        if (query.ansiedad_id != None):
             temp = Ansiedad_Semaforo.query.filter_by(ans_sem_id=query.ansiedad_id).first()
-            query.semaforo_nivel = temp.semaforo
+            semaforo_final = temp.semaforo
         result = {
             'nombre': query.nombre,
             'apellido_paterno': query.apellido_paterno,
@@ -486,7 +489,7 @@ def get_vigilancia_by_id(res_user_id):
             'diagnostico_id': query.diagnostico_id,
             'ansiedad_id': query.ansiedad_id,
             'ansiedad_nivel': query.diag_ansiedad_nivel,
-            'semaforo_nivel': query.semaforo_nivel,
+            'semaforo_nivel': semaforo_final,
             'usuario_id':query.usuario_id
         }
         return make_response(jsonify({'message': 'Datos encontrados', 'status': 200, 'data': result}), 200)
