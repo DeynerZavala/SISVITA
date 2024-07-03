@@ -26,6 +26,7 @@ from utils.db import db
 
 diagnostico_routes = Blueprint('diagnostico_routes', __name__)
 
+
 @diagnostico_routes.route('/diagnostico', methods=['GET'])
 def get_diagnostico():
     all_diagnostico = Diagnostico.query.all()
@@ -39,3 +40,34 @@ def get_diagnostico():
     return make_response(jsonify(data), 200)
 
 
+@diagnostico_routes.route('/diagnostico', methods=['POST'])
+def create_diagnostico():
+    try:
+        especialista_id = request.json.get('especialista_id')
+        ansiedad_id = request.json.get('ansiedad_id')
+        fecha = func.now()
+        comunicacion_estudiante = request.json.get('comunicacion_estudiante')
+        solicitar_cita = request.json.get('solicitar_cita')
+        tratamiento_id = request.json.get('tratamiento_id')
+        fundamentacion_cientifica = request.json.get('fundamentacion_cientifica')
+
+        if not all(especialista_id,ansiedad_id,comunicacion_estudiante,solicitar_cita,tratamiento_id,fundamentacion_cientifica):
+            return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
+
+        new_diagnostico = Diagnostico(especialista_id=especialista_id,ansiedad_id=ansiedad_id,fecha=fecha,comunicacion_estudiante=comunicacion_estudiante,
+                                      solicitar_cita=solicitar_cita,tratamiento_id=tratamiento_id,fundamentacion_cientifica=fundamentacion_cientifica)
+        db.session.add(new_diagnostico)
+        db.session.commit()
+        result = diagnostico_schema.dump(new_diagnostico)
+        data = {
+            'message': 'Nuevo Diagnostico creado',
+            'status': 200,
+            'data': result
+        }
+        return make_response(jsonify(data), 200)
+
+
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+        return make_response(jsonify({'message': 'Error', 'status': 200}), 200)
