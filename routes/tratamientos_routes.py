@@ -32,7 +32,7 @@ def get_tratamientos():
     result = tratamiento_schema.dump(all_tratamientos)
     print(result)
     data = {
-        'message': 'Todo los tratamientos',
+        'message': 'Todo los Tratamientos',
         'status': 200,
         'data': result
     }
