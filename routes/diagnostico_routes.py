@@ -62,7 +62,8 @@ def create_diagnostico():
         new_diagnostico = Diagnostico(especialista_id=especialista_id,ansiedad_id=ansiedad_id,fecha=fecha,comunicacion_estudiante=comunicacion_estudiante,
                                       solicitar_cita=solicitar_cita,tratamiento_id=tratamiento_id,fundamentacion_cientifica=fundamentacion_cientifica)
         db.session.add(new_diagnostico)
-        actualizar = Respuesta_Usuario.query.get(res_user_id=res_user_id)
+        print(res_user_id)
+        actualizar = Respuesta_Usuario.query.get(res_user_id)
         actualizar.diagnostico_id = new_diagnostico.diagnostico_id
         db.session.commit()
         result = diagnostico_schema.dump(new_diagnostico)

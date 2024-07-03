@@ -393,8 +393,7 @@ def getVigilancia():
     results = []
     for row in query:
         if (row.ansiedad_id != None):
-            temp = Ansiedad_Semaforo.query.filter_by(ans_sem_id=row.semaforo_ansiedad_id).first()
-            temp = ansiedad_semaforo_schema.dump(temp)
+            temp = Ansiedad_Semaforo.query.filter_by(ans_sem_id=row.ansiedad_id).first()
             row.semaforo_nivel = temp.semaforo
         result = {
             'nombre': row.nombre,
@@ -472,9 +471,8 @@ def get_vigilancia_by_id(res_user_id):
 
     if query:
         if query.ansiedad_id is not None:
-            temp = Ansiedad_Semaforo.query.filter_by(ans_sem_id=query.semaforo_ansiedad_id).first()
-            temp = ansiedad_semaforo_schema.dump(temp)
-            query.semaforo_nivel = temp['semaforo']
+            temp = Ansiedad_Semaforo.query.filter_by(ans_sem_id=query.ansiedad_id).first()
+            query.semaforo_nivel = temp.semaforo
         result = {
             'nombre': query.nombre,
             'apellido_paterno': query.apellido_paterno,
