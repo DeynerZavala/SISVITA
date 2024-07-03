@@ -358,6 +358,7 @@ def getVigilancia():
             Ansiedad.nivel.label('diag_ansiedad_nivel'),
             Ansiedad.nivel.label('semaforo_ansiedad_id'),
             Ansiedad_Semaforo.semaforo.label('semaforo_nivel'),
+            Usuarios.usuario_id.label('usuario_id'),
 
         )
         .join(Respuesta_Usuario, Respuesta_Usuario.usuario_id == Usuarios.usuario_id)
@@ -385,6 +386,7 @@ def getVigilancia():
             Diagnostico.fundamentacion_cientifica,
             Diagnostico.comunicacion_estudiante,
             Tratamientos.tratamiento_nombre,
+            Usuarios.usuario_id
         )
         .all()
     )
@@ -435,6 +437,7 @@ def get_vigilancia_by_id(res_user_id):
             Ansiedad.nivel.label('diag_ansiedad_nivel'),
             Ansiedad.nivel.label('semaforo_ansiedad_id'),
             Ansiedad_Semaforo.semaforo.label('semaforo_nivel'),
+            Usuarios.usuario_id.label('usuario_id')
         )
         .join(Respuesta_Usuario, Respuesta_Usuario.usuario_id == Usuarios.usuario_id)
         .join(Respuestas, Respuestas.res_user_id == Respuesta_Usuario.res_user_id)
@@ -461,6 +464,7 @@ def get_vigilancia_by_id(res_user_id):
             Diagnostico.fundamentacion_cientifica,
             Diagnostico.comunicacion_estudiante,
             Tratamientos.tratamiento_nombre,
+            Usuarios.usuario_id
         )
         .first()
     )
