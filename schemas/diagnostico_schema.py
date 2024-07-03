@@ -5,6 +5,6 @@ class DiagnosticosSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Diagnostico
         fields = ('diagnostico_id','especialista_id', 'ansiedad_id','fecha',
-                  'observaciones', 'solicitar_cita')
+                  'comunicacion_estudiante', 'solicitar_cita','tratamiento_id','fundamentacion_cientifica')
 diagnostico_schema = DiagnosticosSchema()
 diagnosticos_schema = DiagnosticosSchema(many=True)
