@@ -9,5 +9,5 @@ class Tratamientos(db.Model):
     tratamiento_id = db.Column(db.Integer, primary_key=True)
     tratamiento_nombre = db.Column(db.String(255))
 
-    def __init__(self, tratamiento_id,  tratamiento_nombre):
+    def __init__(self,  tratamiento_nombre):
         self.tratamiento_nombre = tratamiento_nombre
