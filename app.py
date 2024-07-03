@@ -9,6 +9,7 @@ from routes.preguntas_routes import preguntas_routes
 from routes.test_routes import test_routes
 from routes.especialistas_routes import especialistas_routes
 from routes.titulo_routes import titulo_routes
+from routes.tratamientos_routes import tratamientos_routes
 from routes.ubigeo_routes import ubigeo_routes
 from routes.usuarios_routes import usuarios_routes
 from config import DATABASE_CONNECTION_URI
@@ -38,6 +39,7 @@ app.register_blueprint(ansiedad_semaforo_routes)
 app.register_blueprint(ubigeo_routes)
 app.register_blueprint(diagnostico_routes)
 app.register_blueprint(ansiedad_routes)
+app.register_blueprint(tratamientos_routes)
 
 @app.route('/')
 def hello_world():  # put application's code here
