@@ -410,7 +410,7 @@ def getVigilancia():
             'ansiedad_id': row.ansiedad_id,
             'ansiedad_nivel': row.diag_ansiedad_nivel,
             'semaforo_nivel': row.semaforo_nivel,
-            'usuario_id': query.usuario_id
+            'usuario_id': row.usuario_id
         }
         results.append(result)
 
