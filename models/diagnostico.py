@@ -6,7 +6,7 @@ class Diagnostico(db.Model):
     __tablename__ = 'diagnostico'
 
     diagnostico_id = db.Column(db.Integer, primary_key=True)
-    especialista_id= db.Column(db.Integer, db.ForeignKey('especialistas.especialista_id'), nullable=False)
+    especialista_id= db.Column(db.Integer, db.ForeignKey('especialistas.especialista_id'), nullable=False, autoincrement=True)
     ansiedad_id= db.Column(db.Integer, db.ForeignKey('ansiedad.ansiedad_id'), nullable=False)
     fecha = db.Column(db.TIMESTAMP(timezone=True), nullable=False, default=func.now())
     comunicacion_estudiante = db.Column(db.Text)

@@ -409,7 +409,8 @@ def getVigilancia():
             'diagnostico_id': row.diagnostico_id,
             'ansiedad_id': row.ansiedad_id,
             'ansiedad_nivel': row.diag_ansiedad_nivel,
-            'semaforo_nivel': row.semaforo_nivel
+            'semaforo_nivel': row.semaforo_nivel,
+            'usuario_id': query.usuario_id
         }
         results.append(result)
 
@@ -487,7 +488,8 @@ def get_vigilancia_by_id(res_user_id):
             'diagnostico_id': query.diagnostico_id,
             'ansiedad_id': query.ansiedad_id,
             'ansiedad_nivel': query.diag_ansiedad_nivel,
-            'semaforo_nivel': query.semaforo_nivel
+            'semaforo_nivel': query.semaforo_nivel,
+            'usuario_id':query.usuario_id
         }
         return make_response(jsonify({'message': 'Datos encontrados', 'status': 200, 'data': result}), 200)
     else:

@@ -44,16 +44,19 @@ def get_diagnostico():
 def create_diagnostico():
     try:
         usuario_id = request.json['usuario_id']
-        especialista_id = request.json.get('especialista_id')
-        ansiedad_id = request.json.get('ansiedad_id')
+        especialista_id = request.json['especialista_id']
+        ansiedad_id = request.json['ansiedad_id']
         fecha = func.now()
-        comunicacion_estudiante = request.json.get('comunicacion_estudiante')
-        solicitar_cita = request.json.get('solicitar_cita')
-        tratamiento_id = request.json.get('tratamiento_id')
-        fundamentacion_cientifica = request.json.get('fundamentacion_cientifica')
+        comunicacion_estudiante = request.json['comunicacion_estudiante']
+        solicitar_cita = request.json['solicitar_cita']
+        tratamiento_id = request.json['tratamiento_id']
+        fundamentacion_cientifica = request.json['fundamentacion_cientifica']
 
-        if not all[especialista_id,ansiedad_id,comunicacion_estudiante,solicitar_cita,tratamiento_id,fundamentacion_cientifica,usuario_id]:
+        if not all([especialista_id,ansiedad_id, tratamiento_id,fundamentacion_cientifica,usuario_id]):
             return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
+        if (comunicacion_estudiante== None and solicitar_cita==None):
+            return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
+
 
         new_diagnostico = Diagnostico(especialista_id=especialista_id,ansiedad_id=ansiedad_id,fecha=fecha,comunicacion_estudiante=comunicacion_estudiante,
                                       solicitar_cita=solicitar_cita,tratamiento_id=tratamiento_id,fundamentacion_cientifica=fundamentacion_cientifica)
