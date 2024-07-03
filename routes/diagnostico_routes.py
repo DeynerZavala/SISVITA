@@ -43,6 +43,7 @@ def get_diagnostico():
 @diagnostico_routes.route('/diagnostico', methods=['POST'])
 def create_diagnostico():
     try:
+        res_user_id = request.json['res_user_id']
         usuario_id = request.json['usuario_id']
         especialista_id = request.json['especialista_id']
         ansiedad_id = request.json['ansiedad_id']
@@ -52,7 +53,7 @@ def create_diagnostico():
         tratamiento_id = request.json['tratamiento_id']
         fundamentacion_cientifica = request.json['fundamentacion_cientifica']
 
-        if not all([especialista_id,ansiedad_id, tratamiento_id,fundamentacion_cientifica,usuario_id]):
+        if not all([especialista_id,ansiedad_id, tratamiento_id,fundamentacion_cientifica,usuario_id,res_user_id]):
             return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
         if (comunicacion_estudiante== None and solicitar_cita==None):
             return make_response(jsonify({'message': 'Datos incompletos', 'status': 400}), 200)
@@ -61,6 +62,8 @@ def create_diagnostico():
         new_diagnostico = Diagnostico(especialista_id=especialista_id,ansiedad_id=ansiedad_id,fecha=fecha,comunicacion_estudiante=comunicacion_estudiante,
                                       solicitar_cita=solicitar_cita,tratamiento_id=tratamiento_id,fundamentacion_cientifica=fundamentacion_cientifica)
         db.session.add(new_diagnostico)
+        actualizar = Respuesta_Usuario.query.get(res_user_id=res_user_id)
+        actualizar.diagnostico_id = new_diagnostico.diagnostico_id
         db.session.commit()
         result = diagnostico_schema.dump(new_diagnostico)
         data = {
