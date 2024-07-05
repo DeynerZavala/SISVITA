@@ -304,20 +304,21 @@ def getMapadeCalor():
                 Ubigeo.longitud,
                 Diagnostico.ansiedad_id,
                 Ansiedad_Semaforo.semaforo,
+
             )
             .all()
         )
         response = []
         for row in user_responses:
+            semaforo_final = row.nivel_semaforo
             if (row.ansiedad_id != None):
-                temp = Ansiedad_Semaforo.query.filter_by(ans_sem_id=row.semaforo_ansiedad_id).first()
-                temp = ansiedad_semaforo_schema.dump(temp)
-                row.nivel_semaforo = temp.semaforo
+                temp = Ansiedad_Semaforo.query.filter_by(ans_sem_id=row.ansiedad_id).first()
+                semaforo_final = temp.semaforo
             max_value = db.session.query(func.max(Test_Templates.max)).filter_by(test_id=row.test_id).scalar()
             response.append({
                 'puntuacion': row.puntuacion,
                 'ubigeo': row.ubigeo,
-                'nivel_semaforo': row.nivel_semaforo,
+                'nivel_semaforo':semaforo_final,
                 'maximo': max_value,
                 'res_user_id': row.res_user_id,
                 'longitud': row.longitud,
