@@ -19,7 +19,7 @@ from models.tratamientos import Tratamientos
 from models.ubigeo import Ubigeo
 from models.usuarios import Usuarios
 from schemas.ansiedad_semaforo_schema import ansiedad_semaforo_schema
-from schemas.diagnostico_schema import diagnostico_schema
+from schemas.diagnostico_schema import diagnostico_schema, diagnosticos_schema
 from schemas.respuesta_schema import respuesta_schema
 from schemas.respuesta_usuario_schema import respuesta_usuario_schema, respuestas_usuario_schema
 from schemas.test_template_schema import test_template_schema, test_templates_schema, Test_TemplatesSchema
@@ -37,7 +37,7 @@ diagnostico_routes = Blueprint('diagnostico_routes', __name__)
 @diagnostico_routes.route('/diagnostico', methods=['GET'])
 def get_diagnostico():
    all_diagnostico = Diagnostico.query.all()
-   result = diagnostico_schema.dump(all_diagnostico)
+   result = diagnosticos_schema.dump(all_diagnostico)
    print(result)
    data = {
        'message': 'Todo los diagnosticos',
@@ -84,11 +84,6 @@ def create_diagnostico():
 
        enviar_correo_diagnostico(usuario, str(especialistatemp.nombre+" "+ especialistatemp.apellido_paterno+" "+especialistatemp.apellido_materno), new_diagnostico.fecha, str(tratamiento.tratamiento_nombre), solicitar_cita)
 
-
-
-
-
-
        db.session.commit()
        result = diagnostico_schema.dump(new_diagnostico)
        data = {
@@ -97,9 +92,6 @@ def create_diagnostico():
            'data': result
        }
        return make_response(jsonify(data), 200)
-
-
-
 
    except Exception as e:
        db.session.rollback()

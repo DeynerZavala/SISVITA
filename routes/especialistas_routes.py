@@ -90,7 +90,7 @@ def get_especialista(id):
             'status': 404,
         }
         return make_response(jsonify(data), 404)
-    result = especialistas_schema.dump(especialista)
+    result = especialista_schema.dump(especialista)
     data = {
         'message': "Especialista encontrado",
         'status': 200,
@@ -126,7 +126,7 @@ def update_especialista(id):
 
     db.session.commit()
 
-    result = especialistas_schema.dump(especialista)
+    result = especialista_schema.dump(especialista)
 
     data = {
         'message': "Especialista actualizado",
